@@ -1,0 +1,2 @@
+[console_scripts]
+datature = datature.nexus.cli.main:main

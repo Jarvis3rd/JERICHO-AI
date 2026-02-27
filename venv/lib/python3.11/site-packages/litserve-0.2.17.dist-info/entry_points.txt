@@ -1,0 +1,3 @@
+[console_scripts]
+lightning = litserve.cli:main
+litserve = litserve.__main__:main
