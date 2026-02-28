@@ -10,3 +10,5 @@ httpx
 python-dotenv
 requests
 mcp
+langchain-community>=0.2.0
+duckduckgo-search>=6.0.0
