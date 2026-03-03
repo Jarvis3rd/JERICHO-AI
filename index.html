@@ -309,26 +309,26 @@
       } catch(e) { return e.message || 'Connection failed'; }
     }
 
-    const backdrop = document.getElementById('modal-backdrop');
-    document.getElementById('btn-connect').addEventListener('click', () => {
+    const SANDBOX_ID = 'jericho-agent-tokens-1gmma8';
+
+    document.getElementById('btn-connect').addEventListener('click', async () => {
       if (room) { room.disconnect(); return; }
-      document.getElementById('err').textContent = '';
-      backdrop.classList.add('open');
-    });
-    document.getElementById('btn-cancel').addEventListener('click', () => backdrop.classList.remove('open'));
-    document.getElementById('btn-go').addEventListener('click', async () => {
-      const url   = document.getElementById('inp-url').value.trim();
-      const token = document.getElementById('inp-token').value.trim();
-      if (!url || !token) { document.getElementById('err').textContent = 'Both fields required.'; return; }
-      const btn = document.getElementById('btn-go');
+      const btn = document.getElementById('btn-connect');
       btn.textContent = 'Connecting…'; btn.disabled = true;
-      const err = await connect(url, token);
-      btn.textContent = 'Connect'; btn.disabled = false;
-      if (err) { document.getElementById('err').textContent = err; }
-      else {
-        backdrop.classList.remove('open');
-        document.getElementById('btn-connect').textContent = 'Disconnect';
-        document.getElementById('btn-connect').classList.add('disc');
+      try {
+        const res = await fetch('https://cloud-api.livekit.io/api/sandbox/connection-details', {
+          method: 'POST',
+          headers: { 'X-Sandbox-ID': SANDBOX_ID, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ participant_name: 'user_' + Math.random().toString(36).slice(2,7) })
+        });
+        if (!res.ok) throw new Error('Could not get connection details');
+        const data = await res.json();
+        const err = await connect(data.serverUrl, data.participantToken);
+        if (err) { status('ERROR', ''); btn.textContent = 'Connect'; btn.disabled = false; }
+        else { btn.textContent = 'Disconnect'; btn.classList.add('disc'); btn.disabled = false; }
+      } catch(e) {
+        status('ERROR', '');
+        btn.textContent = 'Connect'; btn.disabled = false;
       }
     });
   </script>
