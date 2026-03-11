@@ -29,7 +29,7 @@ class Assistant(Agent):
             instructions=AGENT_INSTRUCTION,
             llm=openai.realtime.RealtimeModel(
                 model="gpt-4o-realtime-preview",
-                voice="onyx",
+                voice="ash"
                 temperature=0.6,
                 turn_detection=TurnDetection(
                     type="server_vad",
