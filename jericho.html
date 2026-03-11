@@ -20,7 +20,7 @@
       color: #ccc;
       font-family: 'Rajdhani', sans-serif;
       min-height: 100vh;
-      display: flex;
+      display: flex
       flex-direction: column;
       align-items: center;
       justify-content: center;
@@ -303,7 +303,23 @@
           room = null;
         });
 
+        // Attach remote audio tracks to DOM so they actually play
+        room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
+          if (track.kind === LivekitClient.Track.Kind.Audio) {
+            const audioEl = track.attach();
+            audioEl.style.display = 'none';
+            document.body.appendChild(audioEl);
+          }
+        });
+
+        // Clean up audio elements when track is removed
+        room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track) => {
+          track.detach().forEach(el => el.remove());
+        });
+
         await room.connect(url, token);
+        // Unlock audio on mobile browsers (requires being inside a user gesture)
+        await room.startAudio();
         await room.localParticipant.setMicrophoneEnabled(true);
         return null;
       } catch(e) { return e.message || 'Connection failed'; }
