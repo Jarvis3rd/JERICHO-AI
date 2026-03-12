@@ -352,5 +352,13 @@
       }
     });
   </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/JERICHO-AI/sw.js')
+        .then(() => console.log('SW registered'))
+        .catch(e => console.error('SW error:', e));
+    }
+  </script>
 </body>
 </html>
