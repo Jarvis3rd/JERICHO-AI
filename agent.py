@@ -2,14 +2,19 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from livekit import agents
-from livekit.agents import AgentSession, Agent, RoomInputOptions, ChatContext
+from livekit.agents import AgentSession, Agent, RoomInputOptions, ChatContext, function_tool
 from livekit.plugins import noise_cancellation, openai
 from livekit.plugins.openai.realtime.realtime_model import (
     TurnDetection,
     InputAudioTranscription,
     InputAudioNoiseReduction,
 )
-from prompts import AGENT_INSTRUCTION, SESSION_INSTRUCTION
+from prompts import (
+    AGENT_INSTRUCTION,
+    SESSION_INSTRUCTION,
+    DEMO_AGENT_INSTRUCTION,
+    DEMO_SESSION_INSTRUCTION,
+)
 from tools import get_weather, search_web, send_email
 from phone_control import control_phone
 from google_calendar import manage_google_calendar
@@ -21,12 +26,75 @@ import logging
 
 MEM0_API_KEY = os.getenv("MEM0_API_KEY")
 USER_ID = "lloyd_smith"
+DEMO_USER_ID = "demo_visitor"
+DEMO_MODE = os.getenv("DEMO_MODE", "false").lower() == "true"
+
+# -- Demo-mode stub tools -----------------------------------------------------
+# These replace the real action tools when DEMO_MODE=true.
+# They explain what Jericho would do without taking any real-world action.
+
+@function_tool
+async def demo_send_email(to: str, subject: str, body: str) -> str:
+    """Send an email to a recipient on behalf of the user."""
+    return (
+        f"In a full deployment I would send an email to '{to}' with subject '{subject}'. "
+        "However, this is a public demo -- real email sending is disabled. "
+        "Contact Aperture Automations to see this capability in action."
+    )
+
+@function_tool
+async def demo_control_phone(action: str, number: str = "") -> str:
+    """Control the phone -- make calls, answer, hang up, or manage phone actions."""
+    return (
+        "In a full deployment I would carry out that phone action for you. "
+        "However, this is a public demo -- phone control is disabled. "
+        "Contact Aperture Automations to see this capability in action."
+    )
+
+@function_tool
+async def demo_manage_google_calendar(action: str, details: str = "") -> str:
+    """Manage Google Calendar -- create, update, read, or delete events."""
+    return (
+        "In a full deployment I would manage your calendar accordingly. "
+        "However, this is a public demo -- calendar access is disabled. "
+        "Contact Aperture Automations to see this capability in action."
+    )
+
+@function_tool
+async def demo_send_sms(to: str, message: str) -> str:
+    """Send an SMS message to a phone number."""
+    return (
+        f"In a full deployment I would send an SMS to '{to}'. "
+        "However, this is a public demo -- SMS sending is disabled. "
+        "Contact Aperture Automations to see this capability in action."
+    )
 
 
 class Assistant(Agent):
     def __init__(self, chat_ctx=None) -> None:
+        if DEMO_MODE:
+            instructions = DEMO_AGENT_INSTRUCTION
+            tools = [
+                get_weather,
+                search_web,
+                demo_send_email,
+                demo_control_phone,
+                demo_manage_google_calendar,
+                demo_send_sms,
+            ]
+        else:
+            instructions = AGENT_INSTRUCTION
+            tools = [
+                get_weather,
+                search_web,
+                send_email,
+                control_phone,
+                manage_google_calendar,
+                send_sms,
+            ]
+
         super().__init__(
-            instructions=AGENT_INSTRUCTION,
+            instructions=instructions,
             llm=openai.realtime.RealtimeModel(
                 model="gpt-4o-realtime-preview",
                 voice="ash",
@@ -45,21 +113,21 @@ class Assistant(Agent):
                     type="near_field",
                 ),
             ),
-            tools=[
-                get_weather,
-                search_web,
-                send_email,
-                control_phone,
-                manage_google_calendar,
-                send_sms,
-            ],
+            tools=tools,
             chat_ctx=chat_ctx,
         )
 
 
 async def entrypoint(ctx: agents.JobContext):
+    active_user_id = DEMO_USER_ID if DEMO_MODE else USER_ID
+    active_session_instruction = DEMO_SESSION_INSTRUCTION if DEMO_MODE else SESSION_INSTRUCTION
 
     async def shutdown_hook(chat_ctx: ChatContext, mem0: AsyncMemoryClient, memory_str: str):
+        # Skip saving memories for demo visitors to keep Lloyd's memory clean
+        if DEMO_MODE:
+            logging.info("Demo mode -- skipping memory save for demo_visitor.")
+            return
+
         logging.info("Shutting down - saving chat context to memory...")
         messages_formatted = []
 
@@ -86,25 +154,31 @@ async def entrypoint(ctx: agents.JobContext):
         logging.info(f"Messages to save: {messages_formatted}")
         await save_memories(mem0, USER_ID, messages_formatted)
 
-    # ── Initialize mem0 ───────────────────────────────────────────────────────
+    # -- Initialize mem0 ------------------------------------------------------
     mem0 = AsyncMemoryClient(api_key=MEM0_API_KEY)
     memory_str = ''
     initial_ctx = ChatContext()
 
     try:
-        memory_str = await load_memories(mem0, USER_ID)
+        memory_str = await load_memories(mem0, active_user_id)
         if memory_str:
-            logging.info(f"Loaded memories for {USER_ID}")
-            initial_ctx.add_message(
-                role="assistant",
-                content=f"The user's name is Lloyd, and this is relevant context about them: {memory_str}."
-            )
+            logging.info(f"Loaded memories for {active_user_id}")
+            if DEMO_MODE:
+                initial_ctx.add_message(
+                    role="assistant",
+                    content=f"Here is context from previous demo interactions: {memory_str}."
+                )
+            else:
+                initial_ctx.add_message(
+                    role="assistant",
+                    content=f"The user's name is Lloyd, and this is relevant context about them: {memory_str}."
+                )
         else:
             logging.info("No existing memories found for user.")
     except Exception as e:
         logging.error(f"Failed to retrieve memories: {e}")
 
-    # ── Start session ─────────────────────────────────────────────────────────
+    # -- Start session --------------------------------------------------------
     session = AgentSession()
 
     await session.start(
@@ -119,10 +193,10 @@ async def entrypoint(ctx: agents.JobContext):
     await ctx.connect()
 
     await session.generate_reply(
-        instructions=SESSION_INSTRUCTION,
+        instructions=active_session_instruction,
     )
 
-    # ── Register shutdown callback ────────────────────────────────────────────
+    # -- Register shutdown callback -------------------------------------------
     async def _shutdown():
         await shutdown_hook(session._agent.chat_ctx, mem0, memory_str)
     ctx.add_shutdown_callback(_shutdown)
@@ -131,4 +205,3 @@ async def entrypoint(ctx: agents.JobContext):
 
 if __name__ == "__main__":
     agents.cli.run_app(agents.WorkerOptions(entrypoint_fnc=entrypoint))
-
