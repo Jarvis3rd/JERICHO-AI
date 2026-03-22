@@ -8,17 +8,14 @@
   <meta name="apple-mobile-web-app-title" content="Jericho" />
   <meta name="theme-color" content="#080810" />
   <title>Jericho — Personal</title>
-  <link rel="icon" href="https://jarvis3rd.github.io/JERICHO-AI/icons/icon-192.png" />
   <link rel="apple-touch-icon" href="https://jarvis3rd.github.io/JERICHO-AI/icons/icon-192.png" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --gold:   #c8960c;
-      --gold2:  #e8b820;
-      --dark:   #080810;
-      --dark2:  #0d0d1a;
-      --dark3:  #13131f;
+      --gold:  #c8960c;
+      --dark:  #080810;
+      --dark3: #13131f;
     }
 
     html, body {
@@ -27,301 +24,313 @@
       color: #e0e0e8;
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       overflow: hidden;
-      user-select: none;
-      -webkit-user-select: none;
+      -webkit-user-select: none; user-select: none;
     }
 
-    /* ── BACKGROUND GLOW ── */
     .bg-glow {
       position: fixed; inset: 0; pointer-events: none; z-index: 0;
       background:
-        radial-gradient(ellipse 60% 50% at 50% 30%, rgba(200,150,12,0.07) 0%, transparent 70%),
-        radial-gradient(ellipse 40% 40% at 50% 80%, rgba(74,158,255,0.04) 0%, transparent 60%);
-    }
-
-    /* ── MAIN LAYOUT ── */
-    .screen {
-      position: fixed; inset: 0; z-index: 1;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: env(safe-area-inset-top, 20px) 24px env(safe-area-inset-bottom, 20px);
-      gap: 0;
+        radial-gradient(ellipse 60% 50% at 50% 35%, rgba(200,150,12,0.08) 0%, transparent 70%);
     }
 
     /* ── HEADER ── */
     .header {
       position: fixed; top: 0; left: 0; right: 0; z-index: 10;
-      padding: env(safe-area-inset-top, 0) 20px 0;
-      display: flex; justify-content: space-between; align-items: center;
+      padding-top: env(safe-area-inset-top, 0);
       height: calc(52px + env(safe-area-inset-top, 0));
-      background: linear-gradient(to bottom, rgba(8,8,16,0.95), transparent);
+      display: flex; justify-content: space-between; align-items: flex-end;
+      padding-left: 20px; padding-right: 20px; padding-bottom: 10px;
+      background: linear-gradient(to bottom, rgba(8,8,16,0.95) 70%, transparent);
     }
     .header-logo {
-      font-size: 0.65rem; font-weight: 700; letter-spacing: 3px;
-      text-transform: uppercase; color: var(--gold); opacity: 0.8;
+      font-size: 0.62rem; font-weight: 700; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--gold); opacity: 0.75;
     }
     .header-badge {
-      font-size: 0.6rem; font-weight: 700; letter-spacing: 2px;
-      text-transform: uppercase; color: #3a3a4a;
-      border: 1px solid #2a2a3a; padding: 3px 10px; border-radius: 20px;
+      font-size: 0.58rem; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: #50c878;
+      border: 1px solid #50c87840; padding: 3px 10px; border-radius: 20px;
+      background: #50c87810;
     }
 
-    /* ── AVATAR AREA ── */
-    .avatar-zone {
-      display: flex; flex-direction: column; align-items: center;
-      margin-bottom: 40px;
+    /* ── MAIN SCREEN ── */
+    .screen {
+      position: fixed; inset: 0; z-index: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 80px 24px 160px;
     }
+
+    /* ── AVATAR ── */
+    .avatar-zone { display: flex; flex-direction: column; align-items: center; margin-bottom: 32px; }
 
     .avatar-ring {
       position: relative;
       width: 140px; height: 140px;
       display: flex; align-items: center; justify-content: center;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
     }
 
-    /* Outer animated ring */
-    .avatar-ring::before, .avatar-ring::after {
-      content: '';
+    /* Outer rings */
+    .ring1, .ring2 {
       position: absolute; border-radius: 50%;
-      border: 1px solid rgba(200,150,12,0.25);
-      animation: ring-pulse 3s ease-in-out infinite;
+      border: 1px solid rgba(200,150,12,0.2);
+      animation: ring-idle 3s ease-in-out infinite;
     }
-    .avatar-ring::before { inset: -16px; animation-delay: 0s; }
-    .avatar-ring::after  { inset: -32px; animation-delay: 0.8s; opacity: 0.5; }
+    .ring1 { inset: -14px; }
+    .ring2 { inset: -28px; animation-delay: 0.7s; opacity: 0.5; }
 
-    @keyframes ring-pulse {
-      0%, 100% { transform: scale(1);    opacity: 0.3; }
-      50%       { transform: scale(1.04); opacity: 0.7; }
+    @keyframes ring-idle {
+      0%,100% { transform: scale(1);    opacity: 0.25; }
+      50%      { transform: scale(1.03); opacity: 0.55; }
     }
 
-    /* Active speaking rings */
-    .avatar-ring.speaking::before { animation: ring-speak 0.8s ease-in-out infinite; border-color: rgba(200,150,12,0.6); }
-    .avatar-ring.speaking::after  { animation: ring-speak 0.8s ease-in-out infinite 0.2s; border-color: rgba(200,150,12,0.4); }
+    /* Speaking state */
+    .avatar-ring.speaking .ring1,
+    .avatar-ring.speaking .ring2 {
+      border-color: rgba(200,150,12,0.7);
+      animation: ring-speak 0.7s ease-in-out infinite;
+    }
+    .avatar-ring.speaking .ring2 { animation-delay: 0.15s; }
     @keyframes ring-speak {
-      0%, 100% { transform: scale(1);    opacity: 0.5; }
-      50%       { transform: scale(1.08); opacity: 1; }
+      0%,100% { transform: scale(1);    opacity: 0.5; }
+      50%      { transform: scale(1.07); opacity: 1;   }
     }
 
-    .avatar-ring.listening::before { animation: ring-listen 1.2s ease-in-out infinite; border-color: rgba(74,158,255,0.5); }
-    .avatar-ring.listening::after  { animation: ring-listen 1.2s ease-in-out infinite 0.3s; border-color: rgba(74,158,255,0.3); }
+    /* Listening state */
+    .avatar-ring.listening .ring1,
+    .avatar-ring.listening .ring2 {
+      border-color: rgba(74,158,255,0.5);
+      animation: ring-listen 1.1s ease-in-out infinite;
+    }
     @keyframes ring-listen {
-      0%, 100% { transform: scale(1);    opacity: 0.4; }
-      50%       { transform: scale(1.06); opacity: 0.8; }
+      0%,100% { transform: scale(1);    opacity: 0.35; }
+      50%      { transform: scale(1.05); opacity: 0.75; }
     }
 
-    .avatar-img {
+    /* Avatar circle — CSS only, no image dependency */
+    .avatar-face {
       width: 100px; height: 100px;
       border-radius: 50%;
-      object-fit: cover;
+      background: radial-gradient(135deg at 35% 35%, #1e1a10, #0d0d1a);
       border: 2px solid rgba(200,150,12,0.5);
-      box-shadow: 0 0 30px rgba(200,150,12,0.2), 0 8px 32px rgba(0,0,0,0.6);
+      box-shadow: 0 0 28px rgba(200,150,12,0.18), 0 6px 28px rgba(0,0,0,0.7);
+      display: flex; align-items: center; justify-content: center;
       z-index: 1; position: relative;
-      transition: border-color 0.3s;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      overflow: hidden;
     }
-    .avatar-ring.speaking .avatar-img  { border-color: rgba(200,150,12,0.9); box-shadow: 0 0 40px rgba(200,150,12,0.4), 0 8px 32px rgba(0,0,0,0.6); }
-    .avatar-ring.listening .avatar-img { border-color: rgba(74,158,255,0.7); box-shadow: 0 0 30px rgba(74,158,255,0.3), 0 8px 32px rgba(0,0,0,0.6); }
+
+    /* Try to load the actual image; fall back to letter */
+    .avatar-face img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      border-radius: 50%;
+    }
+
+    .avatar-face .avatar-fallback {
+      position: absolute;
+      font-size: 2.4rem; font-weight: 700;
+      color: var(--gold); letter-spacing: 1px;
+      font-family: Georgia, serif;
+      opacity: 0.9;
+    }
+
+    .avatar-ring.speaking .avatar-face  { border-color: rgba(200,150,12,0.9); box-shadow: 0 0 40px rgba(200,150,12,0.4), 0 6px 24px rgba(0,0,0,0.6); }
+    .avatar-ring.listening .avatar-face { border-color: rgba(74,158,255,0.7);  box-shadow: 0 0 32px rgba(74,158,255,0.3), 0 6px 24px rgba(0,0,0,0.6); }
 
     .avatar-name {
-      font-size: 1.5rem; font-weight: 300; letter-spacing: 5px;
-      text-transform: uppercase; color: #fff; margin-bottom: 4px;
+      font-size: 1.5rem; font-weight: 300; letter-spacing: 6px;
+      text-transform: uppercase; color: #fff; margin-bottom: 5px;
     }
     .avatar-title {
-      font-size: 0.7rem; font-weight: 600; letter-spacing: 3px;
-      text-transform: uppercase; color: var(--gold); opacity: 0.8;
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--gold); opacity: 0.75;
     }
 
-    /* ── STATUS TEXT ── */
+    /* ── STATUS ── */
     .status-text {
-      font-size: 0.78rem; letter-spacing: 1px; color: #666;
-      min-height: 20px; text-align: center;
+      margin-top: 24px;
+      font-size: 0.8rem; letter-spacing: 0.5px;
+      color: #555; min-height: 20px; text-align: center;
       transition: color 0.3s;
-      margin-top: 20px;
     }
     .status-text.active  { color: #aaa; }
-    .status-text.error   { color: #f87161; }
     .status-text.success { color: #50c878; }
+    .status-text.error   { color: #f87161; }
 
-    /* ── TRANSCRIPT ── */
-    .transcript {
-      width: 100%; max-width: 360px;
-      min-height: 60px; max-height: 100px;
-      overflow-y: auto;
-      text-align: center;
-      font-size: 0.85rem; line-height: 1.6; color: #bbb;
-      padding: 0 8px;
-      margin-top: 16px;
+    /* ── ERROR BOX ── */
+    .error-box {
+      display: none;
+      margin-top: 12px;
+      background: rgba(248,113,97,0.08);
+      border: 1px solid rgba(248,113,97,0.25);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 0.75rem; color: #f87161;
+      max-width: 300px; text-align: center; line-height: 1.5;
     }
-    .transcript::-webkit-scrollbar { display: none; }
+    .error-box.show { display: block; }
 
     /* ── CONTROLS ── */
     .controls {
       position: fixed; bottom: 0; left: 0; right: 0;
-      padding: 20px 24px env(safe-area-inset-bottom, 20px);
-      background: linear-gradient(to top, rgba(8,8,16,0.98) 60%, transparent);
-      display: flex; flex-direction: column; align-items: center; gap: 16px;
+      padding: 16px 24px env(safe-area-inset-bottom, 20px);
+      background: linear-gradient(to top, rgba(8,8,16,1) 50%, transparent);
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
     }
 
-    /* Connect button */
     .btn-connect {
-      width: min(280px, 80vw);
-      height: 56px;
-      border-radius: 100px;
-      border: none; cursor: pointer;
-      font-size: 0.85rem; font-weight: 700; letter-spacing: 2px;
+      width: min(290px, 82vw); height: 54px;
+      border-radius: 100px; border: none; cursor: pointer;
+      font-size: 0.82rem; font-weight: 700; letter-spacing: 2px;
       text-transform: uppercase;
       display: flex; align-items: center; justify-content: center; gap: 10px;
-      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
-      outline: none;
+      transition: opacity 0.2s, transform 0.15s;
+      outline: none; -webkit-tap-highlight-color: transparent;
     }
     .btn-connect:active { transform: scale(0.97); }
 
     .btn-connect.idle {
       background: linear-gradient(135deg, #c8960c, #a07008);
       color: #080810;
-      box-shadow: 0 0 24px rgba(200,150,12,0.35), 0 4px 16px rgba(0,0,0,0.5);
+      box-shadow: 0 0 24px rgba(200,150,12,0.3), 0 4px 14px rgba(0,0,0,0.5);
     }
-    .btn-connect.idle:hover { opacity: 0.9; box-shadow: 0 0 36px rgba(200,150,12,0.5), 0 4px 20px rgba(0,0,0,0.5); }
+    .btn-connect.idle:hover { opacity: 0.9; }
 
     .btn-connect.connected {
-      background: rgba(248,113,97,0.15);
+      background: rgba(248,113,97,0.12);
       color: #f87161;
-      border: 1px solid rgba(248,113,97,0.4);
-      box-shadow: none;
+      border: 1px solid rgba(248,113,97,0.35);
     }
     .btn-connect.connecting {
-      background: rgba(200,150,12,0.1);
+      background: rgba(200,150,12,0.08);
       color: var(--gold);
-      border: 1px solid rgba(200,150,12,0.3);
+      border: 1px solid rgba(200,150,12,0.25);
       pointer-events: none;
     }
 
-    /* Mute button */
+    .controls-row { display: flex; align-items: center; gap: 14px; }
+
     .btn-mute {
-      width: 48px; height: 48px; border-radius: 50%;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      color: #888; font-size: 1.1rem;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      transition: background 0.2s, color 0.2s;
-      outline: none;
+      width: 46px; height: 46px; border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #777; font-size: 1rem;
+      cursor: pointer; display: none; align-items: center; justify-content: center;
+      transition: background 0.2s; outline: none;
+      -webkit-tap-highlight-color: transparent;
     }
-    .btn-mute.muted { background: rgba(248,113,97,0.15); color: #f87161; border-color: rgba(248,113,97,0.3); }
-    .btn-mute:active { transform: scale(0.95); }
+    .btn-mute.visible { display: flex; }
+    .btn-mute.muted { background: rgba(248,113,97,0.12); color: #f87161; border-color: rgba(248,113,97,0.3); }
 
-    .controls-row { display: flex; align-items: center; gap: 16px; }
-
-    /* ── CONNECTING DOTS ── */
+    /* Connecting animation */
     .dots { display: inline-flex; gap: 4px; align-items: center; }
     .dots span {
-      width: 5px; height: 5px; border-radius: 50%;
-      background: var(--gold); opacity: 0.5;
-      animation: dot-bounce 1.2s ease-in-out infinite;
+      width: 5px; height: 5px; border-radius: 50%; background: var(--gold);
+      animation: dot 1.2s ease-in-out infinite;
     }
     .dots span:nth-child(2) { animation-delay: 0.2s; }
     .dots span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes dot-bounce { 0%,100%{opacity:0.2;transform:translateY(0)} 50%{opacity:1;transform:translateY(-3px)} }
+    @keyframes dot { 0%,100%{opacity:0.2;transform:translateY(0)} 50%{opacity:1;transform:translateY(-3px)} }
   </style>
 </head>
 <body>
 
 <div class="bg-glow"></div>
 
-<!-- Header -->
 <div class="header">
   <div class="header-logo">Aperture Automations</div>
   <div class="header-badge">Personal</div>
 </div>
 
-<!-- Main screen -->
 <div class="screen">
-
   <div class="avatar-zone">
     <div class="avatar-ring" id="avatarRing">
-      <img
-        class="avatar-img"
-        id="avatarImg"
-        src="https://jarvis3rd.github.io/JERICHO-AI/icons/icon-192.png"
-        alt="Jericho"
-      />
+      <div class="ring1"></div>
+      <div class="ring2"></div>
+      <div class="avatar-face">
+        <img
+          id="avatarImg"
+          src="https://jarvis3rd.github.io/JERICHO-AI/icons/icon-192.png"
+          alt="Jericho"
+          onerror="this.style.display='none'; document.getElementById('avatarLetter').style.display='flex';"
+        />
+        <span class="avatar-fallback" id="avatarLetter" style="display:none">J</span>
+      </div>
     </div>
     <div class="avatar-name">Jericho</div>
     <div class="avatar-title">Personal AI Assistant</div>
   </div>
 
-  <div class="status-text" id="statusText">Ready to connect</div>
-  <div class="transcript" id="transcript"></div>
-
+  <div class="status-text" id="statusText">Ready</div>
+  <div class="error-box" id="errorBox"></div>
 </div>
 
-<!-- Controls -->
 <div class="controls">
   <div class="controls-row">
-    <button class="btn-mute" id="btnMute" onclick="toggleMute()" title="Mute microphone" style="display:none">🎤</button>
+    <button class="btn-mute" id="btnMute" onclick="toggleMute()">🎤</button>
     <button class="btn-connect idle" id="btnConnect" onclick="toggleConnect()">
       <span id="btnIcon">🎙️</span>
       <span id="btnText">Talk to Jericho</span>
     </button>
-    <button class="btn-mute" id="btnMute2" onclick="toggleMute()" title="Mute microphone" style="display:none">🎤</button>
+    <button class="btn-mute" id="btnMute2" onclick="toggleMute()">🎤</button>
   </div>
 </div>
 
-<!-- LiveKit client SDK -->
 <script src="https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js"></script>
-
 <script>
-(function() {
-  // ── CONFIG ──────────────────────────────────────────
+(function () {
   var LIVEKIT_URL = 'wss://jerichoagent-uluhqyve.livekit.cloud';
-  var TOKEN       = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJBUEk0UU5BWlNxcXh0ZmUiLCJzdWIiOiJsbG95ZCIsIm5hbWUiOiJMbG95ZCIsIm5iZiI6MTc3NDIxOTk3MSwiZXhwIjoxODA1NzU1OTcxLCJ2aWRlbyI6eyJyb29tIjoibGxveWQtcGVyc29uYWwiLCJyb29tSm9pbiI6dHJ1ZSwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZSwiYWdlbnQiOmZhbHNlfSwibWV0YWRhdGEiOiIifQ.Jxsd0G0nTaV06N-zF7tUKC1p2U9yPja8L7k4BrbV48Y';
+  var TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJBUEk0UU5BWlNxcXh0ZmUiLCJzdWIiOiJsbG95ZCIsIm5hbWUiOiJMbG95ZCIsIm5iZiI6MTc3NDIxOTk3MSwiZXhwIjoxODA1NzU1OTcxLCJ2aWRlbyI6eyJyb29tIjoibGxveWQtcGVyc29uYWwiLCJyb29tSm9pbiI6dHJ1ZSwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZSwiYWdlbnQiOmZhbHNlfSwibWV0YWRhdGEiOiIifQ.Jxsd0G0nTaV06N-zF7tUKC1p2U9yPja8L7k4BrbV48Y';
 
-  // ── STATE ────────────────────────────────────────────
-  var room     = null;
-  var muted    = false;
+  var room      = null;
+  var muted     = false;
   var connected = false;
 
-  // ── ELEMENTS ─────────────────────────────────────────
   var btnConnect  = document.getElementById('btnConnect');
   var btnMute     = document.getElementById('btnMute');
   var btnMute2    = document.getElementById('btnMute2');
   var btnIcon     = document.getElementById('btnIcon');
   var btnText     = document.getElementById('btnText');
   var statusEl    = document.getElementById('statusText');
-  var transcriptEl= document.getElementById('transcript');
+  var errorBox    = document.getElementById('errorBox');
   var avatarRing  = document.getElementById('avatarRing');
 
-  // ── HELPERS ──────────────────────────────────────────
-  function setStatus(text, cls) {
-    statusEl.textContent = text;
+  function setStatus(msg, cls) {
+    statusEl.textContent = msg;
     statusEl.className = 'status-text' + (cls ? ' ' + cls : '');
   }
 
-  function setTranscript(text) {
-    transcriptEl.textContent = text;
+  function showError(msg) {
+    errorBox.textContent = msg;
+    errorBox.className = 'error-box show';
   }
 
-  function showMuteButtons(show) {
-    btnMute.style.display  = show ? 'flex' : 'none';
-    btnMute2.style.display = show ? 'flex' : 'none';
+  function clearError() {
+    errorBox.className = 'error-box';
   }
 
-  function setAvatarState(state) {
+  function setAvatar(state) {
     avatarRing.className = 'avatar-ring' + (state ? ' ' + state : '');
   }
 
-  // ── CONNECT ──────────────────────────────────────────
-  window.toggleConnect = async function() {
-    if (connected) {
-      await disconnect();
-    } else {
-      await connect();
-    }
+  function showMute(show) {
+    btnMute.className  = 'btn-mute' + (show ? ' visible' : '');
+    btnMute2.className = 'btn-mute' + (show ? ' visible' : '');
+  }
+
+  window.toggleConnect = async function () {
+    if (connected) { await doDisconnect(); } else { await doConnect(); }
   };
 
-  async function connect() {
+  async function doConnect() {
+    clearError();
     btnConnect.className = 'btn-connect connecting';
     btnIcon.textContent  = '';
     btnText.innerHTML    = '<span class="dots"><span></span><span></span><span></span></span>';
-    setStatus('Connecting to Jericho…', 'active');
+    setStatus('Connecting…', 'active');
 
     try {
       room = new LivekitClient.Room({
@@ -330,74 +339,53 @@
         audioCaptureDefaults: {
           echoCancellation: true,
           noiseSuppression: true,
-          autoGainControl: true,
-        },
-      });
-
-      // ── Room events ──
-      room.on(LivekitClient.RoomEvent.ParticipantConnected, function(participant) {
-        if (participant.identity && participant.identity !== 'lloyd') {
-          setStatus('Jericho is online', 'success');
-          setAvatarState('');
+          autoGainControl: true
         }
       });
 
-      room.on(LivekitClient.RoomEvent.ParticipantDisconnected, function(participant) {
-        if (participant.identity && participant.identity !== 'lloyd') {
-          setStatus('Jericho disconnected', '');
-          setAvatarState('');
+      room.on(LivekitClient.RoomEvent.ParticipantConnected, function (p) {
+        if (p.identity !== 'lloyd') {
+          setStatus('Jericho is here', 'success');
+          clearError();
         }
       });
 
-      room.on(LivekitClient.RoomEvent.TrackSubscribed, function(track, pub, participant) {
+      room.on(LivekitClient.RoomEvent.ParticipantDisconnected, function (p) {
+        if (p.identity !== 'lloyd') {
+          setStatus('Jericho stepped away', '');
+          setAvatar('');
+        }
+      });
+
+      room.on(LivekitClient.RoomEvent.TrackSubscribed, function (track) {
         if (track.kind === LivekitClient.Track.Kind.Audio) {
           var el = track.attach();
           el.style.display = 'none';
           document.body.appendChild(el);
-          setAvatarState('speaking');
-          track.on(LivekitClient.TrackEvent.AudioPlaybackStarted, function() {
-            setAvatarState('speaking');
-          });
         }
       });
 
-      room.on(LivekitClient.RoomEvent.TrackUnsubscribed, function(track) {
+      room.on(LivekitClient.RoomEvent.TrackUnsubscribed, function (track) {
         track.detach();
-        setAvatarState('');
+        setAvatar('');
       });
 
-      room.on(LivekitClient.RoomEvent.ActiveSpeakersChanged, function(speakers) {
-        var agentSpeaking = speakers.some(function(s) { return s.identity !== 'lloyd'; });
-        var lloydSpeaking = speakers.some(function(s) { return s.identity === 'lloyd'; });
-        if (agentSpeaking) {
-          setAvatarState('speaking');
-        } else if (lloydSpeaking) {
-          setAvatarState('listening');
-        } else {
-          setAvatarState('');
-        }
+      room.on(LivekitClient.RoomEvent.ActiveSpeakersChanged, function (speakers) {
+        var agentTalking = speakers.some(function (s) { return s.identity !== 'lloyd'; });
+        var lloydTalking = speakers.some(function (s) { return s.identity === 'lloyd'; });
+        if (agentTalking)       { setAvatar('speaking'); }
+        else if (lloydTalking)  { setAvatar('listening'); }
+        else                    { setAvatar(''); }
       });
 
-      room.on(LivekitClient.RoomEvent.DataReceived, function(data, participant) {
-        try {
-          var msg = JSON.parse(new TextDecoder().decode(data));
-          if (msg.type === 'transcript' || msg.text) {
-            setTranscript(msg.text || msg.transcript || '');
-          }
-        } catch(e) {}
-      });
+      room.on(LivekitClient.RoomEvent.Disconnected, function () { onDisconnected(); });
 
-      room.on(LivekitClient.RoomEvent.Disconnected, function() {
-        onDisconnected();
-      });
-
-      room.on(LivekitClient.RoomEvent.ConnectionStateChanged, function(state) {
+      room.on(LivekitClient.RoomEvent.ConnectionStateChanged, function (state) {
         if (state === LivekitClient.ConnectionState.Reconnecting) {
           setStatus('Reconnecting…', 'active');
         }
       });
 
-      // ── Connect ──
       await room.connect(LIVEKIT_URL, TOKEN);
       await room.localParticipant.setMicrophoneEnabled(true);
 
@@ -405,13 +393,24 @@
       btnConnect.className = 'btn-connect connected';
       btnIcon.textContent  = '✕';
       btnText.textContent  = 'End Session';
-      showMuteButtons(true);
-      setStatus('Connected — speak to Jericho', 'success');
-      setAvatarState('listening');
+      showMute(true);
+      setStatus('Connected — speak naturally', 'success');
+      setAvatar('listening');
 
-    } catch(err) {
-      console.error('Connection error:', err);
-      setStatus('Connection failed — tap to retry', 'error');
+      // If no agent joins within 10 seconds, show a helpful message
+      setTimeout(function () {
+        var hasAgent = false;
+        room.remoteParticipants.forEach(function () { hasAgent = true; });
+        if (!hasAgent && connected) {
+          setStatus('Waiting for Jericho…', 'active');
+          showError('Jericho is starting up — please wait a moment or try ending and reconnecting.');
+        }
+      }, 10000);
+
+    } catch (err) {
+      console.error('LiveKit connection error:', err);
+      showError('Could not connect: ' + (err.message || err.toString()) + '. Please try again.');
+      setStatus('Connection failed', 'error');
       btnConnect.className = 'btn-connect idle';
       btnIcon.textContent  = '🎙️';
       btnText.textContent  = 'Talk to Jericho';
@@ -419,41 +418,34 @@
     }
   }
 
-  async function disconnect() {
-    if (room) {
-      await room.disconnect();
-    }
+  async function doDisconnect() {
+    if (room) { try { await room.disconnect(); } catch (e) {} }
     onDisconnected();
   }
 
   function onDisconnected() {
-    connected = false;
-    room = null;
+    connected = false; room = null; muted = false;
     btnConnect.className = 'btn-connect idle';
     btnIcon.textContent  = '🎙️';
     btnText.textContent  = 'Talk to Jericho';
-    showMuteButtons(false);
+    showMute(false);
     setStatus('Session ended', '');
-    setAvatarState('');
-    setTranscript('');
-    // Remove any attached audio elements
-    document.querySelectorAll('audio').forEach(function(a) { a.remove(); });
+    setAvatar('');
+    clearError();
+    document.querySelectorAll('audio').forEach(function (a) { a.remove(); });
   }
 
-  // ── MUTE ─────────────────────────────────────────────
-  window.toggleMute = function() {
+  window.toggleMute = function () {
     if (!room || !connected) return;
     muted = !muted;
     room.localParticipant.setMicrophoneEnabled(!muted);
-    [btnMute, btnMute2].forEach(function(b) {
+    [btnMute, btnMute2].forEach(function (b) {
       b.textContent = muted ? '🔇' : '🎤';
-      b.className   = 'btn-mute' + (muted ? ' muted' : '');
+      b.className = b.className.replace(' muted', '') + (muted ? ' muted' : '');
     });
-    setStatus(muted ? 'Microphone muted' : 'Microphone active', muted ? '' : 'active');
+    setStatus(muted ? 'Microphone muted' : 'Microphone on', muted ? '' : 'active');
   };
-
 })();
 </script>
-
 </body>
 </html>
