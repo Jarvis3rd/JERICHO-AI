@@ -464,8 +464,12 @@ function doConnect() {
     room.on(LivekitClient.RoomEvent.TrackSubscribed, function(track) {
       if (track.kind === LivekitClient.Track.Kind.Audio) {
         var el = track.attach();
+        el.setAttribute('playsinline', '');
+        el.setAttribute('autoplay', '');
         el.style.display = 'none';
         document.body.appendChild(el);
+        // Force play — required on iOS Safari
+        el.play().catch(function() {});
       }
     });
 
@@ -497,6 +501,8 @@ function doConnect() {
       })
       .then(function() {
         connected = true;
+        // Unlock audio on iOS Safari — must be called in user gesture context
+        if (room.startAudio) { room.startAudio(); }
         btnConnect.className = 'btn-connect connected';
         btnIcon.textContent  = '✕';
         btnText.textContent  = 'End Session';
