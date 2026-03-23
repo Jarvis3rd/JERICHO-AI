@@ -29,7 +29,9 @@
 
     .bg-glow {
       position: fixed; inset: 0; pointer-events: none; z-index: 0;
-      background: radial-gradient(ellipse 60% 50% at 50% 35%, rgba(200,150,12,0.08) 0%, transparent 70%);
+      background:
+        radial-gradient(ellipse 40% 40% at 50% 38%, rgba(0,180,255,0.07) 0%, transparent 70%),
+        radial-gradient(ellipse 70% 50% at 50% 38%, rgba(200,150,12,0.04) 0%, transparent 80%);
     }
 
     .header {
@@ -56,6 +58,7 @@
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       padding: 80px 24px 160px;
+      pointer-events: none;
     }
 
     .avatar-zone { display: flex; flex-direction: column; align-items: center; margin-bottom: 32px; }
@@ -101,35 +104,117 @@
       50%      { transform: scale(1.05); opacity: 0.75; }
     }
 
-    .avatar-face {
+    /* ── ARC REACTOR ── */
+    .arc-reactor {
       width: 100px; height: 100px;
       border-radius: 50%;
-      background: radial-gradient(135deg at 35% 35%, #1e1a10, #0d0d1a);
-      border: 2px solid rgba(200,150,12,0.5);
-      box-shadow: 0 0 28px rgba(200,150,12,0.18), 0 6px 28px rgba(0,0,0,0.7);
+      background: radial-gradient(circle at 50% 50%, #001828 0%, #000812 60%, #000408 100%);
+      border: 2px solid rgba(0,180,255,0.35);
+      box-shadow: 0 0 22px rgba(0,170,255,0.22), 0 0 50px rgba(0,120,200,0.1), inset 0 0 18px rgba(0,150,230,0.08);
       display: flex; align-items: center; justify-content: center;
       z-index: 1; position: relative;
-      transition: border-color 0.3s, box-shadow 0.3s;
-      overflow: hidden;
+      transition: border-color 0.4s, box-shadow 0.4s;
     }
 
-    .avatar-face img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      object-position: center center;
-      border-radius: 50%;
-    }
-
-    .avatar-face .avatar-fallback {
+    /* Outer slow-rotating ring */
+    .arc-r1 {
       position: absolute;
-      font-size: 2.4rem; font-weight: 700;
-      color: var(--gold); letter-spacing: 1px;
-      font-family: Georgia, serif;
-      opacity: 0.9;
+      width: 84px; height: 84px; border-radius: 50%;
+      border: 1.5px solid transparent;
+      border-top-color: rgba(0,210,255,0.85);
+      border-right-color: rgba(0,180,255,0.3);
+      border-bottom-color: rgba(0,160,230,0.1);
+      animation: arc-spin-cw 7s linear infinite;
+    }
+    /* Counter-rotating middle ring */
+    .arc-r2 {
+      position: absolute;
+      width: 64px; height: 64px; border-radius: 50%;
+      border: 1.5px solid transparent;
+      border-bottom-color: rgba(0,220,255,0.9);
+      border-left-color: rgba(0,190,255,0.35);
+      border-top-color: rgba(0,160,220,0.1);
+      animation: arc-spin-ccw 4.5s linear infinite;
+    }
+    /* Inner fast ring */
+    .arc-r3 {
+      position: absolute;
+      width: 46px; height: 46px; border-radius: 50%;
+      border: 1px solid rgba(80,200,255,0.4);
+      border-right-color: rgba(0,220,255,0.85);
+      border-left-color: transparent;
+      animation: arc-spin-cw 2.8s linear infinite;
+      box-shadow: 0 0 6px rgba(0,200,255,0.2);
     }
 
-    .avatar-ring.speaking .avatar-face  { border-color: rgba(200,150,12,0.9); box-shadow: 0 0 40px rgba(200,150,12,0.4), 0 6px 24px rgba(0,0,0,0.6); }
-    .avatar-ring.listening .avatar-face { border-color: rgba(74,158,255,0.7);  box-shadow: 0 0 32px rgba(74,158,255,0.3), 0 6px 24px rgba(0,0,0,0.6); }
+    /* Iron Man triangle - top point */
+    .arc-tri {
+      position: absolute;
+      width: 28px; height: 28px;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-bottom: 24px solid rgba(0,170,255,0.13);
+      top: 26px;
+      filter: drop-shadow(0 0 5px rgba(0,200,255,0.45));
+    }
+    /* Triangle inverted - bottom */
+    .arc-tri2 {
+      position: absolute;
+      width: 28px; height: 28px;
+      border-left: 11px solid transparent;
+      border-right: 11px solid transparent;
+      border-top: 19px solid rgba(0,160,255,0.1);
+      bottom: 24px;
+      filter: drop-shadow(0 0 4px rgba(0,180,255,0.35));
+    }
+
+    /* Glowing center core */
+    .arc-core {
+      position: absolute;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: radial-gradient(circle at 38% 38%, #aaeeff 0%, #22bbff 35%, #0077cc 70%, #003366 100%);
+      box-shadow:
+        0 0 10px rgba(0,200,255,0.95),
+        0 0 22px rgba(0,170,255,0.7),
+        0 0 40px rgba(0,140,220,0.4),
+        0 0 70px rgba(0,100,200,0.2);
+      animation: arc-core-pulse 2.2s ease-in-out infinite;
+      z-index: 2;
+    }
+
+    @keyframes arc-spin-cw  { from { transform: rotate(0deg); }    to { transform: rotate(360deg); } }
+    @keyframes arc-spin-ccw { from { transform: rotate(0deg); }    to { transform: rotate(-360deg); } }
+
+    @keyframes arc-core-pulse {
+      0%,100% {
+        box-shadow: 0 0 10px rgba(0,200,255,0.95), 0 0 22px rgba(0,170,255,0.7),
+                    0 0 40px rgba(0,140,220,0.4),  0 0 70px rgba(0,100,200,0.2);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 14px rgba(0,220,255,1),    0 0 30px rgba(0,190,255,0.9),
+                    0 0 55px rgba(0,160,240,0.55), 0 0 90px rgba(0,120,220,0.3);
+        transform: scale(1.08);
+      }
+    }
+
+    /* Speaking — arc reactor blazes bright blue */
+    .avatar-ring.speaking .arc-reactor {
+      border-color: rgba(0,210,255,0.7);
+      box-shadow: 0 0 35px rgba(0,190,255,0.55), 0 0 70px rgba(0,150,230,0.25), inset 0 0 25px rgba(0,180,255,0.15);
+    }
+    .avatar-ring.speaking .arc-r1 { animation-duration: 2.5s; border-top-color: rgba(0,230,255,1); }
+    .avatar-ring.speaking .arc-r2 { animation-duration: 1.8s; border-bottom-color: rgba(0,240,255,1); }
+    .avatar-ring.speaking .arc-r3 { animation-duration: 1s;   border-right-color: rgba(100,240,255,1); }
+    .avatar-ring.speaking .arc-core { animation-duration: 0.6s; }
+
+    /* Listening — cooler teal tones, gentler */
+    .avatar-ring.listening .arc-reactor {
+      border-color: rgba(0,230,200,0.5);
+      box-shadow: 0 0 22px rgba(0,210,180,0.3), 0 0 45px rgba(0,180,160,0.15), inset 0 0 15px rgba(0,200,170,0.08);
+    }
+    .avatar-ring.listening .arc-r1 { border-top-color: rgba(0,230,200,0.7); }
+    .avatar-ring.listening .arc-r2 { border-bottom-color: rgba(0,220,190,0.75); }
 
     .avatar-name {
       font-size: 1.5rem; font-weight: 300; letter-spacing: 6px;
@@ -164,10 +249,11 @@
     .error-box.show { display: block; }
 
     .controls {
-      position: fixed; bottom: 0; left: 0; right: 0;
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 5;
       padding: 16px 24px env(safe-area-inset-bottom, 20px);
       background: linear-gradient(to top, rgba(8,8,16,1) 50%, transparent);
       display: flex; flex-direction: column; align-items: center; gap: 14px;
+      pointer-events: all;
     }
 
     .btn-connect {
@@ -239,14 +325,13 @@
     <div class="avatar-ring" id="avatarRing">
       <div class="ring1"></div>
       <div class="ring2"></div>
-      <div class="avatar-face">
-        <img
-          id="avatarImg"
-          src="https://jarvis3rd.github.io/JERICHO-AI/icons/icon-192.png"
-          alt="Jericho"
-          onerror="this.style.display='none'; document.getElementById('avatarLetter').style.display='flex';"
-        />
-        <span class="avatar-fallback" id="avatarLetter" style="display:none">J</span>
+      <div class="arc-reactor">
+        <div class="arc-r1"></div>
+        <div class="arc-r2"></div>
+        <div class="arc-r3"></div>
+        <div class="arc-tri"></div>
+        <div class="arc-tri2"></div>
+        <div class="arc-core"></div>
       </div>
     </div>
     <div class="avatar-name">Jericho</div>
