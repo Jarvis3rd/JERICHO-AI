@@ -203,5 +203,18 @@ async def entrypoint(ctx: agents.JobContext):
 
 
 
+async def request_fnc(req):
+    demo_mode = os.environ.get('DEMO_MODE', '').lower() in ('true', '1', 'yes')
+    if demo_mode:
+        if req.room.name == 'lloyd-personal':
+            await req.reject()
+        else:
+            await req.accept()
+    else:
+        if req.room.name == 'lloyd-personal':
+            await req.accept()
+        else:
+            await req.reject()
+
 if __name__ == "__main__":
-    agents.cli.run_app(agents.WorkerOptions(entrypoint_fnc=entrypoint))
+    agents.cli.run_app(agents.WorkerOptions(entrypoint_fnc=entrypoint, request_fnc=request_fnc))
