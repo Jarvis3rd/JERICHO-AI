@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from livekit import agents
-from livekit.agents import AgentSession, Agent, ChatContext, function_tool, RoomOptions
+from livekit.agents import AgentSession, Agent, ChatContext, function_tool, RoomInputOptions
 from livekit.plugins import noise_cancellation, openai
 from livekit.plugins.openai.realtime.realtime_model import (
     TurnDetection,
@@ -117,6 +117,7 @@ class Assistant(Agent):
             chat_ctx=chat_ctx,
         )
 
+
 async def entrypoint(ctx: agents.JobContext):
     active_user_id = DEMO_USER_ID if DEMO_MODE else USER_ID
     active_session_instruction = DEMO_SESSION_INSTRUCTION if DEMO_MODE else SESSION_INSTRUCTION
@@ -176,10 +177,10 @@ async def entrypoint(ctx: agents.JobContext):
     except Exception as e:
         logging.error(f"Failed to retrieve memories: {e}")
 
-# ✅ Connect to room FIRST
+    # Connect to room FIRST before starting session
     await ctx.connect()
 
-    # Then start session
+    # Then initialize and start the agent session
     session = AgentSession()
 
     await session.start(
@@ -195,10 +196,10 @@ async def entrypoint(ctx: agents.JobContext):
         instructions=active_session_instruction,
     )
 
+    # Register shutdown callback to save memories on session end
     async def _shutdown():
         await shutdown_hook(session._agent.chat_ctx, mem0, memory_str)
     ctx.add_shutdown_callback(_shutdown)
-
 
 
 async def request_fnc(req):
@@ -214,5 +215,9 @@ async def request_fnc(req):
         else:
             await req.reject()
 
+
 if __name__ == "__main__":
-    agents.cli.run_app(agents.WorkerOptions(entrypoint_fnc=entrypoint, request_fnc=request_fnc))
+    agents.cli.run_app(agents.WorkerOptions(
+        entrypoint_fnc=entrypoint,
+        request_fnc=request_fnc
+    ))
