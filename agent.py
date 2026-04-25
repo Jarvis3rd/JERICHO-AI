@@ -176,20 +176,18 @@ async def entrypoint(ctx: agents.JobContext):
     except Exception as e:
         logging.error(f"Failed to retrieve memories: {e}")
 
-    # ✅ Connect to room FIRST
+# ✅ Connect to room FIRST
     await ctx.connect()
 
-    # -- Start session AFTER connecting ---------------------------------------
+    # Then start session
     session = AgentSession()
 
     await session.start(
         room=ctx.room,
         agent=Assistant(chat_ctx=initial_ctx),
-        room_options=agents.RoomOptions(
-            input=agents.RoomInputOptions(
-                video_enabled=True,
-                noise_cancellation=noise_cancellation.BVC(),
-            )
+        room_input_options=RoomInputOptions(
+            video_enabled=True,
+            noise_cancellation=noise_cancellation.BVC(),
         ),
     )
 
@@ -197,7 +195,6 @@ async def entrypoint(ctx: agents.JobContext):
         instructions=active_session_instruction,
     )
 
-    # -- Register shutdown callback -------------------------------------------
     async def _shutdown():
         await shutdown_hook(session._agent.chat_ctx, mem0, memory_str)
     ctx.add_shutdown_callback(_shutdown)
