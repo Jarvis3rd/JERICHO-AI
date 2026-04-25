@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from livekit import agents
-from livekit.agents import AgentSession, Agent, RoomInputOptions, ChatContext, function_tool
+from livekit.agents import AgentSession, Agent, ChatContext, function_tool, RoomOptions
 from livekit.plugins import noise_cancellation, openai
 from livekit.plugins.openai.realtime.realtime_model import (
     TurnDetection,
@@ -117,13 +117,11 @@ class Assistant(Agent):
             chat_ctx=chat_ctx,
         )
 
-
 async def entrypoint(ctx: agents.JobContext):
     active_user_id = DEMO_USER_ID if DEMO_MODE else USER_ID
     active_session_instruction = DEMO_SESSION_INSTRUCTION if DEMO_MODE else SESSION_INSTRUCTION
 
     async def shutdown_hook(chat_ctx: ChatContext, mem0: AsyncMemoryClient, memory_str: str):
-        # Skip saving memories for demo visitors to keep Lloyd's memory clean
         if DEMO_MODE:
             logging.info("Demo mode -- skipping memory save for demo_visitor.")
             return
@@ -178,19 +176,22 @@ async def entrypoint(ctx: agents.JobContext):
     except Exception as e:
         logging.error(f"Failed to retrieve memories: {e}")
 
-    # -- Start session --------------------------------------------------------
+    # ✅ Connect to room FIRST
+    await ctx.connect()
+
+    # -- Start session AFTER connecting ---------------------------------------
     session = AgentSession()
 
     await session.start(
         room=ctx.room,
         agent=Assistant(chat_ctx=initial_ctx),
-        room_input_options=RoomInputOptions(
-            video_enabled=True,
-            noise_cancellation=noise_cancellation.BVC(),
+        room_options=agents.RoomOptions(
+            input=agents.RoomInputOptions(
+                video_enabled=True,
+                noise_cancellation=noise_cancellation.BVC(),
+            )
         ),
     )
-
-    await ctx.connect()
 
     await session.generate_reply(
         instructions=active_session_instruction,
