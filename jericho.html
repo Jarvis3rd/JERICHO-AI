@@ -329,26 +329,31 @@
       } catch(e) { return e.message || 'Connection failed'; }
     }
 
-    document.getElementById('btn-connect').addEventListener('click', async () => {
-      if (room) { room.disconnect(); return; }
-      const btn = document.getElementById('btn-connect');
-      btn.textContent = 'Connecting…'; btn.disabled = true;
-      try {
-        const res = await fetch('https://cloud-api.livekit.io/api/sandbox/connection-details', {
-          method: 'POST',
-          headers: { 'X-Sandbox-ID': SANDBOX_ID, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ participant_name: 'user_' + Math.random().toString(36).slice(2,7) })
-        });
-        if (!res.ok) throw new Error('Could not get connection details');
-        const data = await res.json();
-        const err = await connect(data.serverUrl, data.participantToken);
-        if (err) { status('ERROR', ''); btn.textContent = 'Connect'; btn.disabled = false; }
-        else { btn.textContent = 'Disconnect'; btn.classList.add('disc'); btn.disabled = false; }
-      } catch(e) {
-        status('ERROR', '');
-        btn.textContent = 'Connect'; btn.disabled = false;
-      }
-    });
+    const TOKEN_SERVER_URL = 'https://worker-production-3034.up.railway.app/token';
+
+document.getElementById('btn-connect').addEventListener('click', async () => {
+  if (room) { room.disconnect(); return; }
+  const btn = document.getElementById('btn-connect');
+  btn.textContent = 'Connecting…'; btn.disabled = true;
+  try {
+    const res = await fetch(TOKEN_SERVER_URL, { method: 'POST' });
+    if (!res.ok) throw new Error('Could not get token from server');
+    const data = await res.json();
+    const err = await connect(data.serverUrl, data.token);
+    if (err) {
+      status('ERROR', '');
+      btn.textContent = 'Connect'; btn.disabled = false;
+    } else {
+      btn.textContent = 'Disconnect';
+      btn.classList.add('disc');
+      btn.disabled = false;
+    }
+  } catch(e) {
+    console.error('Token fetch error:', e);
+    status('ERROR', '');
+    btn.textContent = 'Connect'; btn.disabled = false;
+  }
+});
   </script>
 
   <script>
