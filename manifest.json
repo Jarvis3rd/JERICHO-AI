@@ -1,0 +1,24 @@
+{
+  "name": "JERICHO AI",
+  "short_name": "JERICHO",
+  "description": "JERICHO - Your AI Voice Agent",
+  "start_url": "/JERICHO-AI/jericho.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#050505",
+  "theme_color": "#c8960c",
+  "icons": [
+    {
+      "src": "/JERICHO-AI/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/JERICHO-AI/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
