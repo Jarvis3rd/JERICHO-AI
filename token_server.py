@@ -9,6 +9,8 @@ CORS(app, origins=["https://apertureautomations.ai", "https://jarvis3rd.github.i
 
 LIVEKIT_API_KEY = os.getenv("LIVEKIT_API_KEY")
 LIVEKIT_API_SECRET = os.getenv("LIVEKIT_API_SECRET")
+print(f"DEBUG: API_KEY={LIVEKIT_API_KEY}, SECRET={LIVEKIT_API_SECRET}")
+LIVEKIT_API_SECRET = os.getenv("LIVEKIT_API_SECRET")
 LIVEKIT_URL = os.getenv("LIVEKIT_URL", "wss://jerichoagent-uluhgyve.livekit.cloud")
 DEMO_MODE = os.getenv("DEMO_MODE", "false").lower() == "true"
 
