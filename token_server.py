@@ -67,10 +67,10 @@ def get_token():
                     return jsonify({"error": "LIVEKIT_API_KEY/SECRET not configured"}), 503
 
         if DEMO_MODE:
-                    room_name = "demo-" + uuid.uuid4().hex[:8]
-                    identity  = "demo_visitor"
+            room_name = "demo-" + uuid.uuid4().hex[:8]
+            identity  = "demo_visitor"
         else:
-        room_name = "lloyd-personal"
+            room_name = "lloyd-personal"
             identity  = "lloyd_smith"
 
     token = make_livekit_token(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, identity, room_name)
