@@ -6,14 +6,33 @@ import uuid
 
 app = Flask(__name__)
 
+# ── Diagnostic: what env vars does Railway actually see? ──────────────────────
+print("=" * 60, flush=True)
+print("ENV DIAGNOSTIC — token_server.py boot", flush=True)
+print("=" * 60, flush=True)
+
+interesting = [k for k in os.environ.keys() if any(
+    s in k.upper() for s in ("LIVEKIT", "ALLOWED_ORIGINS", "DEMO_MODE", "PORT")
+)]
+if not interesting:
+    print("⚠️  No LIVEKIT_* / DEMO_MODE / ALLOWED_ORIGINS / PORT vars found.", flush=True)
+else:
+    for k in sorted(interesting):
+        v = os.environ[k]
+        # Mask secrets — show length + first/last 3 chars only
+        if "SECRET" in k or "KEY" in k:
+            shown = f"<len={len(v)} | {v[:3]}…{v[-3:]}>" if len(v) > 6 else f"<len={len(v)}>"
+        else:
+            shown = v
+        print(f"  {k} = {shown}", flush=True)
+
+print("=" * 60, flush=True)
+
 # ── CORS ──────────────────────────────────────────────────────────────────────
-# Add any new frontend URLs to the ALLOWED_ORIGINS env var in Railway dashboard
-# (comma-separated, no spaces). Falls back to production domains if not set.
 ALLOWED_ORIGINS = os.getenv(
     "ALLOWED_ORIGINS",
     "https://apertureautomations.ai,https://jarvis3rd.github.io"
 ).split(",")
-
 CORS(app, origins=ALLOWED_ORIGINS)
 
 # ── LiveKit credentials ───────────────────────────────────────────────────────
@@ -22,17 +41,24 @@ LIVEKIT_API_SECRET = os.getenv("LIVEKIT_API_SECRET")
 LIVEKIT_URL        = os.getenv("LIVEKIT_URL", "wss://jerichoagent-uluhgyve.livekit.cloud")
 DEMO_MODE          = os.getenv("DEMO_MODE", "false").lower() == "true"
 
-# Fail fast on boot if credentials are missing — shows a clear error in
-# Railway logs instead of generating broken tokens silently.
 if not LIVEKIT_API_KEY or not LIVEKIT_API_SECRET:
-    raise RuntimeError(
-        "LIVEKIT_API_KEY and LIVEKIT_API_SECRET must be set as environment "
-        "variables. Go to Railway → your service → Variables and add them."
+    # Stay alive so /health still responds — easier to debug than a crash loop.
+    print(
+        "❌ LIVEKIT_API_KEY / LIVEKIT_API_SECRET missing. "
+        "Server is starting in degraded mode — /token will 503, /health still works.",
+        flush=True,
     )
+    DEGRADED = True
+else:
+    print("✅ LiveKit credentials loaded.", flush=True)
+    DEGRADED = False
 
 
 @app.route("/token", methods=["GET", "POST"])
 def get_token():
+    if DEGRADED:
+        return jsonify({"error": "LIVEKIT_API_KEY/SECRET not set on server"}), 503
+
     if DEMO_MODE:
         room_name = "demo-" + uuid.uuid4().hex[:8]
         identity  = "demo_visitor"
@@ -47,7 +73,6 @@ def get_token():
         .with_grants(api.VideoGrants(room_join=True, room=room_name))
         .to_jwt()
     )
-
     return jsonify({
         "serverUrl": LIVEKIT_URL,
         "token":     token,
@@ -59,14 +84,16 @@ def get_token():
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({
-        "status":    "ok",
-        "demo_mode": DEMO_MODE,
-        "origins":   ALLOWED_ORIGINS,
+        "status":      "degraded" if DEGRADED else "ok",
+        "demo_mode":   DEMO_MODE,
+        "origins":     ALLOWED_ORIGINS,
+        "have_key":    bool(LIVEKIT_API_KEY),
+        "have_secret": bool(LIVEKIT_API_SECRET),
     })
 
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8082))
-    print(f"Token server starting on port {port} | DEMO_MODE={DEMO_MODE}")
-    print(f"Allowed origins: {ALLOWED_ORIGINS}")
+    print(f"Token server starting on port {port} | DEMO_MODE={DEMO_MODE}", flush=True)
+    print(f"Allowed origins: {ALLOWED_ORIGINS}", flush=True)
     app.run(host="0.0.0.0", port=port)
