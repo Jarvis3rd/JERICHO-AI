@@ -69,7 +69,7 @@ def get_token():
         if DEMO_MODE:
                     room_name = "demo-" + uuid.uuid4().hex[:8]
                     identity  = "demo_visitor"
-else:
+        else:
         room_name = "lloyd-personal"
             identity  = "lloyd_smith"
 
