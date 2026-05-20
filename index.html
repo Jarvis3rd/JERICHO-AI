@@ -1,1 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JERICHO — AI Voice Agent | Aperture Automations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #05070f;
+      --surface: #0b0f1e;
+      --border: rgba(255,255,255,0.07);
+      --accent: #00d4ff;
+      --accent2: #7b5cff;
+      --text: #e8ecf5;
+      --muted: #7a82a0;
+      --glow: rgba(0, 212, 255, 0.15);
+    }
 
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.4;
+    }
+
+    /* ── GRID BACKGROUND ── */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 5vw;
+      background: rgba(5,7,15,0.7);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: 0.08em;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .nav-logo span { color: var(--accent); }
+
+    .nav-cta {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.55rem 1.4rem;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .nav-cta:hover {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8rem 5vw 4rem;
+    }
+
+    /* Radial glow behind hero text */
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(ellipse at center, rgba(0,212,255,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.2s ease forwards;
+    }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(3rem, 8vw, 7rem);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.3rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.4s ease forwards;
+    }
+
+    .hero h1 .accent { color: var(--accent); }
+
+    .hero-sub {
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: clamp(1rem, 2.5vw, 1.5rem);
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.55s ease forwards;
+    }
+
+    .hero-desc {
+      max-width: 560px;
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: rgba(232,236,245,0.7);
+      margin-bottom: 3rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.7s ease forwards;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.85s ease forwards;
+    }
+
+    .btn-primary {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 1rem 2.5rem;
+      background: var(--accent);
+      color: var(--bg);
+      text-decoration: none;
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 0 30px rgba(0,212,255,0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 50px rgba(0,212,255,0.5);
+    }
+
+    .btn-secondary {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 1rem 2.5rem;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── WAVEFORM VISUAL ── */
+    .waveform-wrap {
+      position: relative;
+      margin: 4rem auto 0;
+      width: 100%;
+      max-width: 700px;
+      height: 80px;
+      opacity: 0;
+      animation: fadeUp 0.8s 1s ease forwards;
+    }
+
+    .waveform-wrap canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ── SECTION SHARED ── */
+    section {
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    /* ── PROBLEM ── */
+    .problem {
+      padding: 6rem 5vw;
+      border-top: 1px solid var(--border);
+    }
+
+    .problem-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+    }
+
+    .problem h2 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+    }
+
+    .problem h2 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    .problem p {
+      color: rgba(232,236,245,0.65);
+      font-size: 1.05rem;
+      font-weight: 300;
+      margin-bottom: 1rem;
+    }
+
+    .pain-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .pain-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.2rem 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid rgba(255,80,80,0.5);
+    }
+
+    .pain-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+
+    .pain-item p {
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    .pain-item strong {
+      display: block;
+      color: var(--text);
+      font-weight: 500;
+      margin-bottom: 0.2rem;
+    }
+
+    /* ── VALUE PROPS ── */
+    .value {
+      padding: 6rem 5vw;
+      background: linear-gradient(180deg, transparent 0%, rgba(0,212,255,0.02) 50%, transparent 100%);
+      border-top: 1px solid var(--border);
+    }
+
+    .value-header {
+      max-width: 1100px;
+      margin: 0 auto 4rem;
+      text-align: center;
+    }
+
+    .value-header h2 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin-bottom: 1rem;
+    }
+
+    .value-header p {
+      color: var(--muted);
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .value-grid {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5px;
+      background: var(--border);
+    }
+
+    .value-card {
+      background: var(--bg);
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s;
+    }
+
+    .value-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .value-card:hover {
+      background: var(--surface);
+    }
+
+    .value-card:hover::before {
+      opacity: 1;
+    }
+
+    .value-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      opacity: 0.6;
+    }
+
+    .value-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .value-card p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      font-weight: 300;
+      line-height: 1.7;
+    }
+
+    /* ── USE CASES ── */
+    .usecases {
+      padding: 6rem 5vw;
+      border-top: 1px solid var(--border);
+    }
+
+    .usecases-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .usecases-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .usecases-header h2 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin-bottom: 1rem;
+    }
+
+    .usecase-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+
+    .usecase-card {
+      padding: 2rem 2.5rem;
+      border: 1px solid var(--border);
+      position: relative;
+      display: flex;
+      gap: 1.5rem;
+      align-items: flex-start;
+      transition: border-color 0.3s;
+    }
+
+    .usecase-card:hover {
+      border-color: rgba(0,212,255,0.3);
+    }
+
+    .usecase-icon {
+      font-size: 1.8rem;
+      flex-shrink: 0;
+    }
+
+    .usecase-card h4 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .usecase-card p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .howitworks {
+      padding: 6rem 5vw;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .howitworks-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .howitworks-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .howitworks-header h2 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin-bottom: 1rem;
+    }
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 2rem;
+      padding: 2.5rem 0;
+      border-bottom: 1px solid var(--border);
+      align-items: flex-start;
+    }
+
+    .step:last-child { border-bottom: none; }
+
+    .step-num {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 2.5rem;
+      color: var(--accent);
+      opacity: 0.2;
+      line-height: 1;
+    }
+
+    .step h4 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .step p {
+      font-size: 0.95rem;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    /* ── CTA ── */
+    .cta-section {
+      padding: 8rem 5vw;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px;
+      height: 400px;
+      background: radial-gradient(ellipse, rgba(123,92,255,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-section h2 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      line-height: 1.05;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .cta-section h2 span { color: var(--accent); }
+
+    .cta-section p {
+      color: var(--muted);
+      max-width: 480px;
+      margin: 0 auto 3rem;
+      font-size: 1.05rem;
+      font-weight: 300;
+      position: relative;
+    }
+
+    .cta-section .btn-primary {
+      position: relative;
+      font-size: 0.95rem;
+      padding: 1.2rem 3rem;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 2rem 5vw;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 1;
+    }
+
+    footer p {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    footer a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      transition: color 0.2s;
+    }
+
+    footer a:hover { color: var(--accent); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50%       { opacity: 1; }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .problem-inner { grid-template-columns: 1fr; gap: 3rem; }
+      .value-grid { grid-template-columns: 1fr; gap: 1px; }
+      .usecase-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      nav { padding: 1rem 5vw; }
+      .hero h1 { font-size: 3.5rem; }
+      .step { grid-template-columns: 60px 1fr; }
+    }
+
+    /* ── STATUS PILL ── */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 1rem;
+      border: 1px solid rgba(0,212,255,0.2);
+      background: rgba(0,212,255,0.05);
+      font-family: 'Syne', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.05s ease forwards;
+    }
+
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s infinite;
+    }
+  </style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#"><span>APERTURE</span> AUTOMATIONS</a>
+  <a class="nav-cta" href="#demo">Request a Demo</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="status-pill"><span class="status-dot"></span> Now accepting limited deployments</div>
+  <p class="hero-eyebrow">Aperture Automations presents</p>
+  <h1>MEET <span class="accent">JERICHO</span></h1>
+  <p class="hero-sub">Your AI Voice Agent — Always On. Always Ready.</p>
+  <p class="hero-desc">
+    Jericho handles your calls, qualifies your leads, and engages your customers in real-time — so your team never misses another opportunity.
+  </p>
+  <div class="hero-actions">
+    <a href="#demo" class="btn-primary">Request a Demo</a>
+    <a href="#how" class="btn-secondary">See How It Works</a>
+  </div>
+  <div class="waveform-wrap">
+    <canvas id="wave"></canvas>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="problem">
+  <div class="problem-inner">
+    <div>
+      <p class="section-label">The Problem</p>
+      <h2>Missed calls are <em>missed revenue.</em></h2>
+      <p>Every unanswered call, every after-hours inquiry, every repetitive FAQ handled by a busy employee — it all adds up. Your business is leaving money on the table.</p>
+      <p>Traditional solutions mean hiring more staff, lengthy onboarding, and high overhead. There has to be a better way.</p>
+    </div>
+    <ul class="pain-list">
+      <li class="pain-item">
+        <span class="pain-icon">📵</span>
+        <div>
+          <strong>Calls going to voicemail</strong>
+          <p>62% of callers won't leave a message — they call your competitor instead.</p>
+        </div>
+      </li>
+      <li class="pain-item">
+        <span class="pain-icon">⏰</span>
+        <div>
+          <strong>After-hours dead zones</strong>
+          <p>Leads inquiring nights and weekends hear silence. Jericho doesn't sleep.</p>
+        </div>
+      </li>
+      <li class="pain-item">
+        <span class="pain-icon">🔁</span>
+        <div>
+          <strong>Staff tied up on repetitive calls</strong>
+          <p>Hours lost answering the same 10 questions, every single day.</p>
+        </div>
+      </li>
+      <li class="pain-item">
+        <span class="pain-icon">📉</span>
+        <div>
+          <strong>Unqualified leads wasting sales time</strong>
+          <p>Your closers are talking to tire-kickers instead of serious buyers.</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- VALUE PROPS -->
+<section class="value">
+  <div class="value-header">
+    <p class="section-label">Why Jericho</p>
+    <h2>Built for businesses that can't afford to miss a beat</h2>
+    <p>A fully managed AI voice agent deployed and tuned specifically for your operation.</p>
+  </div>
+  <div class="value-grid">
+    <div class="value-card">
+      <p class="value-num">01</p>
+      <h3>Real-Time AI Voice</h3>
+      <p>Powered by advanced language models and low-latency voice synthesis. Jericho speaks naturally, listens intelligently, and responds instantly — no robotic menus, no hold times.</p>
+    </div>
+    <div class="value-card">
+      <p class="value-num">02</p>
+      <h3>Custom Persona & Knowledge</h3>
+      <p>Jericho is trained on your business — your products, your FAQs, your tone. Clients won't know they're talking to an AI unless you want them to.</p>
+    </div>
+    <div class="value-card">
+      <p class="value-num">03</p>
+      <h3>Fully Managed Deployment</h3>
+      <p>Zero technical lift on your end. Aperture Automations handles setup, hosting, updates, and ongoing optimization. You get a working voice agent — we handle everything else.</p>
+    </div>
+    <div class="value-card">
+      <p class="value-num">04</p>
+      <h3>24 / 7 Availability</h3>
+      <p>Jericho never calls in sick, never goes on vacation, and never puts a caller on hold. Round-the-clock coverage at a fraction of the cost of a single hire.</p>
+    </div>
+    <div class="value-card">
+      <p class="value-num">05</p>
+      <h3>Lead Qualification & Routing</h3>
+      <p>Jericho asks the right questions, scores the lead, and routes hot prospects to your team in real time — or logs them for follow-up. Your closers only talk to buyers.</p>
+    </div>
+    <div class="value-card">
+      <p class="value-num">06</p>
+      <h3>Seamless Integration</h3>
+      <p>Connect Jericho to your CRM, scheduling tools, and workflows. Every call becomes structured, actionable data — automatically.</p>
+    </div>
+  </div>
+</section>
+
+<!-- USE CASES -->
+<section class="usecases">
+  <div class="usecases-inner">
+    <div class="usecases-header">
+      <p class="section-label">Use Cases</p>
+      <h2>Jericho works wherever calls happen</h2>
+    </div>
+    <div class="usecase-grid">
+      <div class="usecase-card">
+        <span class="usecase-icon">🏥</span>
+        <div>
+          <h4>Medical & Dental Offices</h4>
+          <p>Handle appointment scheduling, insurance FAQs, and after-hours patient inquiries without burdening your front desk staff.</p>
+        </div>
+      </div>
+      <div class="usecase-card">
+        <span class="usecase-icon">🏡</span>
+        <div>
+          <h4>Real Estate</h4>
+          <p>Qualify inbound buyer and seller leads around the clock, schedule showings, and keep your pipeline moving even when you're with other clients.</p>
+        </div>
+      </div>
+      <div class="usecase-card">
+        <span class="usecase-icon">🔧</span>
+        <div>
+          <h4>Home Services & Contractors</h4>
+          <p>Capture emergency service calls, book estimates, and answer common questions — so no job request slips through the cracks.</p>
+        </div>
+      </div>
+      <div class="usecase-card">
+        <span class="usecase-icon">🏪</span>
+        <div>
+          <h4>Retail & Hospitality</h4>
+          <p>Handle product inquiries, store hours, reservations, and customer service at scale — without adding to your payroll.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="howitworks" id="how">
+  <div class="howitworks-inner">
+    <div class="howitworks-header">
+      <p class="section-label">The Process</p>
+      <h2>Live in days, not months</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <span class="step-num">01</span>
+        <div>
+          <h4>Discovery Call</h4>
+          <p>We learn your business — your callers, your most common questions, your goals, and your preferred tone. No forms, no guesswork.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num">02</span>
+        <div>
+          <h4>Custom Configuration</h4>
+          <p>Aperture Automations builds and voices your Jericho instance — trained on your knowledge base, tuned to your brand persona, and tested thoroughly before launch.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num">03</span>
+        <div>
+          <h4>Deployment & Integration</h4>
+          <p>Jericho goes live on your phone line or web platform. We handle all technical integration with your existing tools and workflows.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-num">04</span>
+        <div>
+          <h4>Ongoing Management</h4>
+          <p>We monitor performance, refine responses, and update Jericho as your business evolves — so it always sounds sharp and on-brand.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="demo">
+  <h2>Ready to put <span>Jericho</span><br>to work?</h2>
+  <p>Limited deployment slots available. Book a 20-minute demo call and see Jericho handle a live conversation for your business.</p>
+  <a href="https://calendly.com/YOUR_LINK_HERE" target="_blank" class="btn-primary">Book Your Demo Call →</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2025 Aperture Automations. All rights reserved.</p>
+  <a href="mailto:hello@apertureautomations.ai">hello@apertureautomations.ai</a>
+</footer>
+
+<!-- WAVEFORM CANVAS ANIMATION -->
+<script>
+  const canvas = document.getElementById('wave');
+  const ctx = canvas.getContext('2d');
+  let W, H, bars = 80, animFrame;
+
+  function resize() {
+    W = canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+    H = canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+
+  const phases = Array.from({length: bars}, (_, i) => Math.random() * Math.PI * 2);
+  const speeds = Array.from({length: bars}, () => 0.015 + Math.random() * 0.02);
+  const baseHeights = Array.from({length: bars}, (_, i) => {
+    const center = (i / bars - 0.5) * 2;
+    return Math.max(0.1, 1 - Math.abs(center) * 1.4);
+  });
+
+  function draw(t) {
+    const cw = canvas.offsetWidth, ch = canvas.offsetHeight;
+    ctx.clearRect(0, 0, cw, ch);
+
+    const barW = cw / bars;
+    const gap = barW * 0.35;
+
+    for (let i = 0; i < bars; i++) {
+      phases[i] += speeds[i];
+      const wave = Math.sin(phases[i] + i * 0.18) * 0.5 + 0.5;
+      const height = (wave * 0.7 + 0.1) * baseHeights[i] * ch * 0.85;
+      const x = i * barW + gap / 2;
+      const y = (ch - height) / 2;
+
+      const alpha = 0.3 + wave * 0.7;
+      ctx.fillStyle = `rgba(0, 212, 255, ${alpha * 0.6})`;
+      ctx.fillRect(x, y, barW - gap, height);
+    }
+
+    animFrame = requestAnimationFrame(draw);
+  }
+
+  requestAnimationFrame(draw);
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.value-card, .usecase-card, .step, .pain-item').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(el);
+  });
+</script>
+
+</body>
+</html>
