@@ -604,11 +604,11 @@
     setState('connecting');
     try {
       const res = await fetch(
-        `${RAILWAY_URL}/token?room=${ROOM_NAME}&identity=${IDENTITY}`,
+        `${RAILWAY_URL}/token`,
         { signal: AbortSignal.timeout(10000) }
       );
       if (!res.ok) throw new Error(`Token server: ${res.status}`);
-      const { token, url } = await res.json();
+      const data = await res.json(); const token = data.token; const url = data.serverUrl;
       if (!token || !url) throw new Error('Invalid token response');
 
       room = new LivekitClient.Room({
