@@ -278,9 +278,9 @@ def run_token_server():
  
  
 if __name__ == "__main__":
-    # Start token server in background thread, then run the LiveKit agent
     t = threading.Thread(target=run_token_server, daemon=True)
     t.start()
+    agents.cli.run_app(...)
  
     agents.cli.run_app(agents.WorkerOptions(
         entrypoint_fnc=entrypoint,
