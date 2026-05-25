@@ -1,6 +1,11 @@
 from dotenv import load_dotenv
 load_dotenv()
- 
+
+import threading
+import asyncio
+import json
+import uuid
+
 from livekit import agents
 from livekit.agents import AgentSession, Agent, ChatContext, function_tool, RoomInputOptions
 from livekit.plugins import noise_cancellation, openai
@@ -277,11 +282,58 @@ def run_token_server():
     asyncio.run(_serve())
  
  
+# ── TOKEN SERVER ──────────────────────────────────────────────────────────────
+
+def run_token_server():
+    from aiohttp import web
+    from livekit.api import AccessToken, VideoGrants
+
+    async def handle_token(request):
+        room     = request.rel_url.query.get('room', 'lloyd-personal')
+        identity = request.rel_url.query.get('identity', f'user-{uuid.uuid4().hex[:8]}')
+        api_key     = os.getenv('LIVEKIT_API_KEY')
+        api_secret  = os.getenv('LIVEKIT_API_SECRET')
+        livekit_url = os.getenv('LIVEKIT_URL')
+        if not api_key or not api_secret:
+            return web.Response(status=500, text='Missing LiveKit credentials')
+        token = (
+            AccessToken(api_key, api_secret)
+            .with_identity(identity)
+            .with_name(identity)
+            .with_grants(VideoGrants(room_join=True, room=room))
+            .to_jwt()
+        )
+        return web.Response(
+            text=json.dumps({'token': token, 'url': livekit_url}),
+            content_type='application/json',
+            headers={'Access-Control-Allow-Origin': '*',
+                     'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                     'Access-Control-Allow-Headers': '*'}
+        )
+
+    async def handle_options(request):
+        return web.Response(status=204,
+            headers={'Access-Control-Allow-Origin': '*',
+                     'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                     'Access-Control-Allow-Headers': '*'})
+
+    async def _serve():
+        app = web.Application()
+        app.router.add_get('/token', handle_token)
+        app.router.add_route('OPTIONS', '/token', handle_options)
+        port = int(os.getenv('PORT', 8080))
+        runner = web.AppRunner(app)
+        await runner.setup()
+        await web.TCPSite(runner, '0.0.0.0', port).start()
+        logging.info(f'[token-server] Listening on port {port}')
+        await asyncio.Event().wait()
+
+    asyncio.run(_serve())
+
+
 if __name__ == "__main__":
     t = threading.Thread(target=run_token_server, daemon=True)
     t.start()
-    agents.cli.run_app(...)
- 
     agents.cli.run_app(agents.WorkerOptions(
         entrypoint_fnc=entrypoint,
         request_fnc=request_fnc
