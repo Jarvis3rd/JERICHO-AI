@@ -1,11 +1,6 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-import threading
-import asyncio
-import json
-import uuid
-
 from livekit import agents
 from livekit.agents import AgentSession, Agent, ChatContext, function_tool, RoomInputOptions
 from livekit.plugins import noise_cancellation, openai
@@ -222,64 +217,66 @@ async def request_fnc(req):
 # ── TOKEN SERVER ──────────────────────────────────────────────────────────────
 
 def run_token_server():
-    """Lightweight aiohttp server for LiveKit token generation.
-    Runs in a background thread alongside the LiveKit agent worker.
+    """Pure stdlib HTTP server for LiveKit token generation.
+    Uses no asyncio — runs safely in a background thread.
     """
-    from aiohttp import web
+    from http.server import HTTPServer, BaseHTTPRequestHandler
+    from urllib.parse import urlparse, parse_qs
     from livekit.api import AccessToken, VideoGrants
 
-    async def handle_token(request):
-        room     = request.rel_url.query.get('room', 'lloyd-personal')
-        identity = request.rel_url.query.get('identity', f'user-{uuid.uuid4().hex[:8]}')
+    class TokenHandler(BaseHTTPRequestHandler):
 
-        api_key     = os.getenv('LIVEKIT_API_KEY')
-        api_secret  = os.getenv('LIVEKIT_API_SECRET')
-        livekit_url = os.getenv('LIVEKIT_URL')
+        def do_OPTIONS(self):
+            self.send_response(204)
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', '*')
+            self.end_headers()
 
-        if not api_key or not api_secret:
-            return web.Response(status=500, text='Missing LiveKit credentials')
+        def do_GET(self):
+            parsed = urlparse(self.path)
+            if parsed.path != '/token':
+                self.send_response(404)
+                self.end_headers()
+                return
 
-        token = (
-            AccessToken(api_key, api_secret)
-            .with_identity(identity)
-            .with_name(identity)
-            .with_grants(VideoGrants(room_join=True, room=room))
-            .to_jwt()
-        )
+            params   = parse_qs(parsed.query)
+            room     = params.get('room',     ['lloyd-personal'])[0]
+            identity = params.get('identity', [f'user-{uuid.uuid4().hex[:8]}'])[0]
 
-        return web.Response(
-            text=json.dumps({'token': token, 'url': livekit_url}),
-            content_type='application/json',
-            headers={
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, OPTIONS',
-                'Access-Control-Allow-Headers': '*',
-            }
-        )
+            api_key     = os.getenv('LIVEKIT_API_KEY')
+            api_secret  = os.getenv('LIVEKIT_API_SECRET')
+            livekit_url = os.getenv('LIVEKIT_URL')
 
-    async def handle_options(request):
-        return web.Response(
-            status=204,
-            headers={
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, OPTIONS',
-                'Access-Control-Allow-Headers': '*',
-            }
-        )
+            if not api_key or not api_secret:
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(b'Missing LiveKit credentials')
+                return
 
-    async def _serve():
-        app = web.Application()
-        app.router.add_get('/token', handle_token)
-        app.router.add_route('OPTIONS', '/token', handle_options)
+            token = (
+                AccessToken(api_key, api_secret)
+                .with_identity(identity)
+                .with_name(identity)
+                .with_grants(VideoGrants(room_join=True, room=room))
+                .to_jwt()
+            )
 
-        port = int(os.getenv('PORT', 8080))
-        runner = web.AppRunner(app)
-        await runner.setup()
-        await web.TCPSite(runner, '0.0.0.0', port).start()
-        logging.info(f'[token-server] Listening on port {port}')
-        await asyncio.Event().wait()   # keep running forever
+            body = json.dumps({'token': token, 'url': livekit_url}).encode()
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Content-Length', str(len(body)))
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(body)
 
-    asyncio.run(_serve())
+        def log_message(self, fmt, *args):
+            logging.info(f'[token-server] {fmt % args}')
+
+    port = int(os.getenv('PORT', 8080))
+    server = HTTPServer(('0.0.0.0', port), TokenHandler)
+    logging.info(f'[token-server] Listening on port {port}')
+    server.serve_forever()
 
 
 if __name__ == "__main__":
