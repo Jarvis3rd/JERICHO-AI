@@ -23,6 +23,10 @@ from mem0 import AsyncMemoryClient
 from mem0_helper import load_memories, save_memories
 import os
 import logging
+import threading
+import asyncio
+import json
+import uuid
 
 MEM0_API_KEY = os.getenv("MEM0_API_KEY")
 USER_ID = "lloyd_smith"
@@ -30,8 +34,6 @@ DEMO_USER_ID = "demo_visitor"
 DEMO_MODE = os.getenv("DEMO_MODE", "false").lower() == "true"
 
 # -- Demo-mode stub tools -----------------------------------------------------
-# These replace the real action tools when DEMO_MODE=true.
-# They explain what Jericho would do without taking any real-world action.
 
 @function_tool
 async def demo_send_email(to: str, subject: str, body: str) -> str:
@@ -153,7 +155,6 @@ async def entrypoint(ctx: agents.JobContext):
         logging.info(f"Messages to save: {messages_formatted}")
         await save_memories(mem0, USER_ID, messages_formatted)
 
-    # -- Initialize mem0 ------------------------------------------------------
     mem0 = AsyncMemoryClient(api_key=MEM0_API_KEY)
     memory_str = ''
     initial_ctx = ChatContext()
@@ -177,10 +178,8 @@ async def entrypoint(ctx: agents.JobContext):
     except Exception as e:
         logging.error(f"Failed to retrieve memories: {e}")
 
-    # Connect to room FIRST before starting session
     await ctx.connect()
 
-    # Then initialize and start the agent session
     session = AgentSession()
 
     await session.start(
@@ -196,7 +195,6 @@ async def entrypoint(ctx: agents.JobContext):
         instructions=active_session_instruction,
     )
 
-    # Register shutdown callback to save memories on session end
     async def _shutdown():
         await shutdown_hook(session._agent.chat_ctx, mem0, memory_str)
     ctx.add_shutdown_callback(_shutdown)
@@ -216,7 +214,74 @@ async def request_fnc(req):
             await req.reject()
 
 
+# ── TOKEN SERVER ──────────────────────────────────────────────────────────────
+
+def run_token_server():
+    """Lightweight aiohttp server for LiveKit token generation.
+    Runs in a background thread alongside the LiveKit agent worker.
+    """
+    from aiohttp import web
+    from livekit.api import AccessToken, VideoGrants
+
+    async def handle_token(request):
+        room     = request.rel_url.query.get('room', 'lloyd-personal')
+        identity = request.rel_url.query.get('identity', f'user-{uuid.uuid4().hex[:8]}')
+
+        api_key     = os.getenv('LIVEKIT_API_KEY')
+        api_secret  = os.getenv('LIVEKIT_API_SECRET')
+        livekit_url = os.getenv('LIVEKIT_URL')
+
+        if not api_key or not api_secret:
+            return web.Response(status=500, text='Missing LiveKit credentials')
+
+        token = (
+            AccessToken(api_key, api_secret)
+            .with_identity(identity)
+            .with_name(identity)
+            .with_grants(VideoGrants(room_join=True, room=room))
+            .to_jwt()
+        )
+
+        return web.Response(
+            text=json.dumps({'token': token, 'url': livekit_url}),
+            content_type='application/json',
+            headers={
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                'Access-Control-Allow-Headers': '*',
+            }
+        )
+
+    async def handle_options(request):
+        return web.Response(
+            status=204,
+            headers={
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                'Access-Control-Allow-Headers': '*',
+            }
+        )
+
+    async def _serve():
+        app = web.Application()
+        app.router.add_get('/token', handle_token)
+        app.router.add_route('OPTIONS', '/token', handle_options)
+
+        port = int(os.getenv('PORT', 8080))
+        runner = web.AppRunner(app)
+        await runner.setup()
+        await web.TCPSite(runner, '0.0.0.0', port).start()
+        logging.info(f'[token-server] Listening on port {port}')
+        await asyncio.Event().wait()   # keep running forever
+
+    asyncio.run(_serve())
+
+
 if __name__ == "__main__":
+    # Start token server in background thread, then run the LiveKit agent
+    t = threading.Thread(target=run_token_server, daemon=True)
+    t.start()
+
     agents.cli.run_app(agents.WorkerOptions(
         entrypoint_fnc=entrypoint,
         request_fnc=request_fnc
