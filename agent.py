@@ -197,17 +197,13 @@ async def entrypoint(ctx: agents.JobContext):
  
  
 async def request_fnc(req):
-    demo_mode = os.environ.get('DEMO_MODE', '').lower() in ('true', '1', 'yes')
-    if demo_mode:
-        if req.room.name == 'lloyd-personal':
-            await req.reject()
-        else:
-            await req.accept()
-    else:
-        if req.room.name == 'lloyd-personal':
-            await req.accept()
-        else:
-            await req.reject()
+    try:
+        room_name = req.room.name
+    except Exception:
+        room_name = str(getattr(req, 'room', 'unknown'))
+    logging.info(f'[request_fnc] Job received for room: {room_name}')
+    await req.accept()
+    logging.info(f'[request_fnc] Accepted job for room: {room_name}')
  
  
 if __name__ == "__main__":
