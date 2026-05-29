@@ -1,101 +1,216 @@
-import os, time, uuid, asyncio, jwt
-from flask import Flask, jsonify, request
-from flask_cors import CORS
- 
-app = Flask(__name__)
- 
-LIVEKIT_API_KEY    = os.getenv("LIVEKIT_API_KEY", "")
-LIVEKIT_API_SECRET = os.getenv("LIVEKIT_API_SECRET", "")
-LIVEKIT_URL        = os.getenv("LIVEKIT_URL", "wss://jerichoagent-uluhqyve.livekit.cloud")
-DEMO_MODE          = os.getenv("DEMO_MODE", "false").lower() == "true"
-AGENT_NAME         = "jericho"
- 
-CORS(app)  # Allow all origins
- 
-DEGRADED = not LIVEKIT_API_KEY or not LIVEKIT_API_SECRET
-print(f"token_server boot | KEY={LIVEKIT_API_KEY[:4]}... | DEGRADED={DEGRADED}", flush=True)
- 
- 
-def make_livekit_token(api_key, api_secret, identity, room):
-    now = int(time.time())
-    payload = {
-        "iss": api_key,
-        "sub": identity,
-        "name": identity,
-        "nbf": now,
-        "exp": now + 6 * 3600,
-        "video": {
-            "roomJoin": True,
-            "room": room,
-            "canPublish": True,
-            "canSubscribe": True,
-            "canPublishData": True,
-        },
-    }
-    return jwt.encode(payload, api_secret, algorithm="HS256")
- 
- 
-async def _dispatch_agent(room_name):
-    """Explicitly dispatch Jericho to the room via LiveKit server API."""
-    try:
-        from livekit import api as lk_api
-        lk = lk_api.LiveKitAPI(
-            url=LIVEKIT_URL,
-            api_key=LIVEKIT_API_KEY,
-            api_secret=LIVEKIT_API_SECRET
+from dotenv import load_dotenv
+load_dotenv()
+
+from livekit import agents
+from livekit.agents import AgentSession, Agent, ChatContext, function_tool, RoomInputOptions
+from livekit.plugins import noise_cancellation, openai
+from livekit.plugins.openai.realtime.realtime_model import (
+    TurnDetection,
+    InputAudioTranscription,
+    InputAudioNoiseReduction,
+)
+from prompts import (
+    AGENT_INSTRUCTION,
+    SESSION_INSTRUCTION,
+    DEMO_AGENT_INSTRUCTION,
+    DEMO_SESSION_INSTRUCTION,
+)
+from tools import get_weather, search_web, send_email
+from phone_control import control_phone
+from google_calendar import manage_google_calendar
+from sms import send_sms
+from mem0 import AsyncMemoryClient
+from mem0_helper import load_memories, save_memories
+import os
+import logging
+
+MEM0_API_KEY = os.getenv("MEM0_API_KEY")
+USER_ID = "lloyd_smith"
+DEMO_USER_ID = "demo_visitor"
+DEMO_MODE = os.getenv("DEMO_MODE", "false").lower() == "true"
+
+# -- Demo-mode stub tools -----------------------------------------------------
+
+@function_tool
+async def demo_send_email(to: str, subject: str, body: str) -> str:
+    """Send an email to a recipient on behalf of the user."""
+    return (
+        f"In a full deployment I would send an email to '{to}' with subject '{subject}'. "
+        "However, this is a public demo -- real email sending is disabled. "
+        "Contact Aperture Automations to see this capability in action."
+    )
+
+@function_tool
+async def demo_control_phone(action: str, number: str = "") -> str:
+    """Control the phone -- make calls, answer, hang up, or manage phone actions."""
+    return (
+        "In a full deployment I would carry out that phone action for you. "
+        "However, this is a public demo -- phone control is disabled. "
+        "Contact Aperture Automations to see this capability in action."
+    )
+
+@function_tool
+async def demo_manage_google_calendar(action: str, details: str = "") -> str:
+    """Manage Google Calendar -- create, update, read, or delete events."""
+    return (
+        "In a full deployment I would manage your calendar accordingly. "
+        "However, this is a public demo -- calendar access is disabled. "
+        "Contact Aperture Automations to see this capability in action."
+    )
+
+@function_tool
+async def demo_send_sms(to: str, message: str) -> str:
+    """Send an SMS message to a phone number."""
+    return (
+        f"In a full deployment I would send an SMS to '{to}'. "
+        "However, this is a public demo -- SMS sending is disabled. "
+        "Contact Aperture Automations to see this capability in action."
+    )
+
+
+class Assistant(Agent):
+    def __init__(self, chat_ctx=None) -> None:
+        if DEMO_MODE:
+            instructions = DEMO_AGENT_INSTRUCTION
+            tools = [
+                get_weather,
+                search_web,
+                demo_send_email,
+                demo_control_phone,
+                demo_manage_google_calendar,
+                demo_send_sms,
+            ]
+        else:
+            instructions = AGENT_INSTRUCTION
+            tools = [
+                get_weather,
+                search_web,
+                send_email,
+                control_phone,
+                manage_google_calendar,
+                send_sms,
+            ]
+
+        super().__init__(
+            instructions=instructions,
+            llm=openai.realtime.RealtimeModel(
+                model="gpt-4o-realtime-preview",
+                voice="ash",
+                temperature=0.6,
+                turn_detection=TurnDetection(
+                    type="server_vad",
+                    silence_duration_ms=800,
+                    threshold=0.5,
+                    prefix_padding_ms=300,
+                    create_response=True,
+                ),
+                input_audio_transcription=InputAudioTranscription(
+                    model="gpt-4o-transcribe",
+                ),
+                input_audio_noise_reduction=InputAudioNoiseReduction(
+                    type="near_field",
+                ),
+            ),
+            tools=tools,
+            chat_ctx=chat_ctx,
         )
-        try:
-            await lk.agent_dispatch.create_dispatch(
-                lk_api.CreateAgentDispatchRequest(
-                    agent_name=AGENT_NAME,
-                    room=room_name,
-                )
-            )
-            print(f"[dispatch] Agent dispatched to room: {room_name}", flush=True)
-        finally:
-            await lk.aclose()
-    except Exception as e:
-        print(f"[dispatch] Failed: {e}", flush=True)
- 
- 
-def dispatch_agent_sync(room_name):
-    loop = asyncio.new_event_loop()
+
+
+async def entrypoint(ctx: agents.JobContext):
+    active_user_id = DEMO_USER_ID if DEMO_MODE else USER_ID
+    active_session_instruction = DEMO_SESSION_INSTRUCTION if DEMO_MODE else SESSION_INSTRUCTION
+
+    async def shutdown_hook(chat_ctx: ChatContext, mem0: AsyncMemoryClient, memory_str: str):
+        if DEMO_MODE:
+            logging.info("Demo mode -- skipping memory save for demo_visitor.")
+            return
+
+        logging.info("Shutting down - saving chat context to memory...")
+        messages_formatted = []
+
+        for item in chat_ctx.items:
+            if not hasattr(item, "content"):
+                continue
+            if isinstance(item.content, list):
+                content_str = ' '.join(
+                    str(c) for c in item.content if c is not None
+                ).strip()
+            else:
+                content_str = str(item.content).strip() if item.content else ''
+
+            if not content_str:
+                continue
+            if memory_str and memory_str in content_str:
+                continue
+            if item.role in ['user', 'assistant']:
+                messages_formatted.append({
+                    "role": item.role,
+                    "content": content_str
+                })
+
+        logging.info(f"Messages to save: {messages_formatted}")
+        await save_memories(mem0, USER_ID, messages_formatted)
+
+    mem0 = None
+    memory_str = ''
+    initial_ctx = ChatContext()
+
     try:
-        loop.run_until_complete(_dispatch_agent(room_name))
-    finally:
-        loop.close()
- 
- 
-@app.route("/health", methods=["GET"])
-def health():
-    return jsonify({"status": "ok" if not DEGRADED else "degraded", "livekit_url": LIVEKIT_URL})
- 
- 
-@app.route("/token", methods=["GET", "POST"])
-def get_token():
-    if DEGRADED:
-        return jsonify({"error": "LIVEKIT_API_KEY/SECRET not configured"}), 503
- 
-    if DEMO_MODE:
-        room_name = "demo-" + uuid.uuid4().hex[:8]
-        identity  = "demo_visitor"
-    else:
-        room_name = "lloyd-personal"
-        identity  = "lloyd_smith"
- 
-    token = make_livekit_token(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, identity, room_name)
- 
-    # Explicitly dispatch Jericho to the room
-    dispatch_agent_sync(room_name)
- 
-    return jsonify({
-        "token":     token,
-        "identity":  identity,
-        "roomName":  room_name,
-        "serverUrl": LIVEKIT_URL
-    })
- 
- 
+        mem0 = AsyncMemoryClient(api_key=MEM0_API_KEY)
+        memory_str = await load_memories(mem0, active_user_id)
+        if memory_str:
+            logging.info(f"Loaded memories for {active_user_id}")
+            if DEMO_MODE:
+                initial_ctx.add_message(
+                    role="assistant",
+                    content=f"Here is context from previous demo interactions: {memory_str}."
+                )
+            else:
+                initial_ctx.add_message(
+                    role="assistant",
+                    content=f"The user's name is Lloyd, and this is relevant context about them: {memory_str}."
+                )
+        else:
+            logging.info("No existing memories found for user.")
+    except Exception as e:
+        logging.error(f"mem0 unavailable, continuing without memory: {e}")
+
+    await ctx.connect()
+
+    session = AgentSession()
+
+    await session.start(
+        room=ctx.room,
+        agent=Assistant(chat_ctx=initial_ctx),
+        room_input_options=RoomInputOptions(
+            video_enabled=True,
+            noise_cancellation=noise_cancellation.BVC(),
+        ),
+    )
+
+    await session.generate_reply(
+        instructions=active_session_instruction,
+    )
+
+    async def _shutdown():
+        if mem0 is not None:
+            await shutdown_hook(session._agent.chat_ctx, mem0, memory_str)
+    ctx.add_shutdown_callback(_shutdown)
+
+
+async def request_fnc(req):
+    try:
+        room_name = req.room.name
+    except Exception:
+        room_name = str(getattr(req, 'room', 'unknown'))
+    logging.info(f'[request_fnc] Job received for room: {room_name}')
+    await req.accept()
+    logging.info(f'[request_fnc] Accepted job for room: {room_name}')
+
+
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 8080))
-    app.run(host="0.0.0.0", port=port)
+    agents.cli.run_app(agents.WorkerOptions(
+        entrypoint_fnc=entrypoint,
+        request_fnc=request_fnc,
+        agent_name="jericho",
+    ))
