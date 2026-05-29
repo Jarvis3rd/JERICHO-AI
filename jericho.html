@@ -603,20 +603,25 @@
   async function connect() {
     setState('connecting');
     try {
-      // iOS-safe fetch with manual timeout
-      const ctrl = new AbortController();
-      const tid  = setTimeout(() => ctrl.abort(), 12000);
-      let res;
+      // Step 1: Fetch token
+      let token, url;
       try {
-        res = await fetch(`${RAILWAY_URL}/token`, { signal: ctrl.signal });
-      } finally {
-        clearTimeout(tid);
+        const ctrl = new AbortController();
+        const tid  = setTimeout(() => ctrl.abort(), 12000);
+        let res;
+        try {
+          res = await fetch(`${RAILWAY_URL}/token`, { signal: ctrl.signal });
+        } finally {
+          clearTimeout(tid);
+        }
+        if (!res.ok) throw new Error(`Token server returned ${res.status}`);
+        const data = await res.json();
+        token = data.token;
+        url   = data.serverUrl;
+        if (!token || !url) throw new Error(`Bad token response: ${JSON.stringify(data)}`);
+      } catch(e) {
+        throw new Error(`Token fetch failed: ${e.message}`);
       }
-      if (!res.ok) throw new Error(`Token server returned ${res.status}`);
-      const data = await res.json();
-      const token = data.token;
-      const url   = data.serverUrl;
-      if (!token || !url) throw new Error(`Bad response: ${JSON.stringify(data)}`);
 
       room = new LivekitClient.Room({
         adaptiveStream: true,
@@ -631,6 +636,8 @@
       room.on(LivekitClient.RoomEvent.Connected, async () => {
         setState('listening');
         await room.localParticipant.setMicrophoneEnabled(true);
+        // Room now exists — trigger agent dispatch
+        fetch(`${RAILWAY_URL}/dispatch?room=${ROOM_NAME}`).catch(console.error);
       });
 
       room.on(LivekitClient.RoomEvent.Disconnected, () => {
