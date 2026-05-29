@@ -34,8 +34,8 @@ def make_livekit_token(api_key, api_secret, identity, room):
     return jwt.encode(payload, api_secret, algorithm="HS256")
  
  
-async def _create_room(room_name):
-    """Create the room so auto-dispatch fires when user joins."""
+async def _dispatch_agent(room_name):
+    """Dispatch Jericho to the room — the exact combo that worked."""
     try:
         from livekit import api as lk_api
         lk = lk_api.LiveKitAPI(
@@ -44,18 +44,23 @@ async def _create_room(room_name):
             api_secret=LIVEKIT_API_SECRET
         )
         try:
-            await lk.room.create_room(lk_api.CreateRoomRequest(name=room_name))
-            print(f"[room] Created: {room_name}", flush=True)
+            await lk.agent_dispatch.create_dispatch(
+                lk_api.CreateAgentDispatchRequest(
+                    agent_name="jericho",
+                    room=room_name,
+                )
+            )
+            print(f"[dispatch] Dispatched to room: {room_name}", flush=True)
         finally:
             await lk.aclose()
     except Exception as e:
-        print(f"[room] Error: {e}", flush=True)
+        print(f"[dispatch] Error: {e}", flush=True)
  
  
-def create_room_sync(room_name):
+def dispatch_sync(room_name):
     loop = asyncio.new_event_loop()
     try:
-        loop.run_until_complete(_create_room(room_name))
+        loop.run_until_complete(_dispatch_agent(room_name))
     finally:
         loop.close()
  
@@ -81,7 +86,7 @@ def get_token():
  
     # Create room in background — triggers auto-dispatch to agent worker
     import threading
-    threading.Thread(target=create_room_sync, args=(room_name,), daemon=True).start()
+    threading.Thread(target=dispatch_sync, args=(room_name,), daemon=True).start()
  
     return jsonify({
         "token":     token,
