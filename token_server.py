@@ -1,5 +1,5 @@
 import os, time, uuid, asyncio, jwt
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
  
 app = Flask(__name__)
@@ -68,6 +68,15 @@ def dispatch_sync(room_name):
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok" if not DEGRADED else "degraded", "livekit_url": LIVEKIT_URL})
+ 
+ 
+@app.route("/dispatch", methods=["GET", "POST"])
+def trigger_dispatch():
+    room_name = request.args.get("room", "lloyd-personal")
+    print(f"[dispatch] Trigger received for room: {room_name}", flush=True)
+    import threading
+    threading.Thread(target=dispatch_sync, args=(room_name,), daemon=True).start()
+    return jsonify({"status": "dispatching", "room": room_name})
  
  
 @app.route("/token", methods=["GET", "POST"])
