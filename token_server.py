@@ -1,4 +1,4 @@
-import os, time, uuid, asyncio, jwt
+import os, time, uuid, jwt
 from flask import Flask, jsonify, request
 from flask_cors import CORS
  
@@ -7,7 +7,6 @@ app = Flask(__name__)
 LIVEKIT_API_KEY    = os.getenv("LIVEKIT_API_KEY", "")
 LIVEKIT_API_SECRET = os.getenv("LIVEKIT_API_SECRET", "")
 LIVEKIT_URL        = os.getenv("LIVEKIT_URL", "wss://jerichoagent-uluhqyve.livekit.cloud")
-DEMO_MODE          = os.getenv("DEMO_MODE", "false").lower() == "true"
  
 CORS(app)
  
@@ -34,49 +33,9 @@ def make_livekit_token(api_key, api_secret, identity, room):
     return jwt.encode(payload, api_secret, algorithm="HS256")
  
  
-async def _dispatch_agent(room_name):
-    """Dispatch Jericho to the room — the exact combo that worked."""
-    try:
-        from livekit import api as lk_api
-        lk = lk_api.LiveKitAPI(
-            url=LIVEKIT_URL,
-            api_key=LIVEKIT_API_KEY,
-            api_secret=LIVEKIT_API_SECRET
-        )
-        try:
-            await lk.agent_dispatch.create_dispatch(
-                lk_api.CreateAgentDispatchRequest(
-                    agent_name="jericho",
-                    room=room_name,
-                )
-            )
-            print(f"[dispatch] Dispatched to room: {room_name}", flush=True)
-        finally:
-            await lk.aclose()
-    except Exception as e:
-        print(f"[dispatch] Error: {e}", flush=True)
- 
- 
-def dispatch_sync(room_name):
-    loop = asyncio.new_event_loop()
-    try:
-        loop.run_until_complete(_dispatch_agent(room_name))
-    finally:
-        loop.close()
- 
- 
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok" if not DEGRADED else "degraded", "livekit_url": LIVEKIT_URL})
- 
- 
-@app.route("/dispatch", methods=["GET", "POST"])
-def trigger_dispatch():
-    room_name = request.args.get("room", "lloyd-personal")
-    print(f"[dispatch] Trigger received for room: {room_name}", flush=True)
-    import threading
-    threading.Thread(target=dispatch_sync, args=(room_name,), daemon=True).start()
-    return jsonify({"status": "dispatching", "room": room_name})
  
  
 @app.route("/token", methods=["GET", "POST"])
@@ -84,18 +43,10 @@ def get_token():
     if DEGRADED:
         return jsonify({"error": "LIVEKIT_API_KEY/SECRET not configured"}), 503
  
-    if DEMO_MODE:
-        room_name = "demo-" + uuid.uuid4().hex[:8]
-        identity  = "demo_visitor"
-    else:
-        room_name = "lloyd-personal"
-        identity  = "lloyd_smith"
+    room_name = "lloyd-personal"
+    identity  = "lloyd_smith"
  
     token = make_livekit_token(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, identity, room_name)
- 
-    # Create room in background — triggers auto-dispatch to agent worker
-    import threading
-    threading.Thread(target=dispatch_sync, args=(room_name,), daemon=True).start()
  
     return jsonify({
         "token":     token,
