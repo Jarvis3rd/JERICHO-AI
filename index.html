@@ -585,11 +585,29 @@
       justify-content: space-between;
       position: relative;
       z-index: 1;
+      gap: 1rem;
+      flex-wrap: wrap;
     }
 
     footer p {
       font-size: 0.8rem;
       color: var(--muted);
+    }
+
+    .footer-address {
+      text-align: center;
+      flex: 1;
+    }
+
+    .footer-address p {
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .footer-address p:last-child {
+      color: var(--accent);
+      opacity: 0.7;
     }
 
     footer a {
@@ -600,6 +618,11 @@
     }
 
     footer a:hover { color: var(--accent); }
+
+    @media (max-width: 700px) {
+      footer { flex-direction: column; text-align: center; gap: 0.75rem; }
+      .footer-address { order: -1; }
+    }
 
     /* ── ANIMATIONS ── */
     @keyframes fadeUp {
@@ -852,8 +875,12 @@
 
 <!-- FOOTER -->
 <footer>
-  <p>© 2025 Aperture Automations. All rights reserved.</p>
-  <a href="mailto:hello@apertureautomations.ai">hello@apertureautomations.ai</a>
+  <p>© 2026 Aperture Automations. All rights reserved.</p>
+  <div class="footer-address">
+    <p>P.O. BOX 26514 · FRESNO, CA 93729</p>
+    <p>Serving Fresno &amp; businesses across the United States</p>
+  </div>
+  <a href="mailto:info@apertureautomations.ai">info@apertureautomations.ai</a>
 </footer>
 
 <!-- WAVEFORM CANVAS ANIMATION -->
