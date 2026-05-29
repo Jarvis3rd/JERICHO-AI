@@ -1,5 +1,5 @@
 import os, time, uuid, asyncio, jwt
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
 from flask_cors import CORS
  
 app = Flask(__name__)
@@ -8,9 +8,8 @@ LIVEKIT_API_KEY    = os.getenv("LIVEKIT_API_KEY", "")
 LIVEKIT_API_SECRET = os.getenv("LIVEKIT_API_SECRET", "")
 LIVEKIT_URL        = os.getenv("LIVEKIT_URL", "wss://jerichoagent-uluhqyve.livekit.cloud")
 DEMO_MODE          = os.getenv("DEMO_MODE", "false").lower() == "true"
-AGENT_NAME         = "jericho"
  
-CORS(app)  # Allow all origins
+CORS(app)
  
 DEGRADED = not LIVEKIT_API_KEY or not LIVEKIT_API_SECRET
 print(f"token_server boot | KEY={LIVEKIT_API_KEY[:4]}... | DEGRADED={DEGRADED}", flush=True)
@@ -35,8 +34,8 @@ def make_livekit_token(api_key, api_secret, identity, room):
     return jwt.encode(payload, api_secret, algorithm="HS256")
  
  
-async def _dispatch_agent(room_name):
-    """Create room then dispatch Jericho — order matters!"""
+async def _create_room(room_name):
+    """Create the room so auto-dispatch fires when user joins."""
     try:
         from livekit import api as lk_api
         lk = lk_api.LiveKitAPI(
@@ -45,27 +44,18 @@ async def _dispatch_agent(room_name):
             api_secret=LIVEKIT_API_SECRET
         )
         try:
-            # Step 1: ensure room exists before dispatching
             await lk.room.create_room(lk_api.CreateRoomRequest(name=room_name))
-            print(f"[dispatch] Room created: {room_name}", flush=True)
-            # Step 2: dispatch agent to the now-existing room
-            await lk.agent_dispatch.create_dispatch(
-                lk_api.CreateAgentDispatchRequest(
-                    agent_name=AGENT_NAME,
-                    room=room_name,
-                )
-            )
-            print(f"[dispatch] Agent dispatched to room: {room_name}", flush=True)
+            print(f"[room] Created: {room_name}", flush=True)
         finally:
             await lk.aclose()
     except Exception as e:
-        print(f"[dispatch] Failed: {e}", flush=True)
+        print(f"[room] Error: {e}", flush=True)
  
  
-def dispatch_agent_sync(room_name):
+def create_room_sync(room_name):
     loop = asyncio.new_event_loop()
     try:
-        loop.run_until_complete(_dispatch_agent(room_name))
+        loop.run_until_complete(_create_room(room_name))
     finally:
         loop.close()
  
@@ -89,9 +79,9 @@ def get_token():
  
     token = make_livekit_token(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, identity, room_name)
  
-    # Dispatch in background so token returns immediately
+    # Create room in background — triggers auto-dispatch to agent worker
     import threading
-    threading.Thread(target=dispatch_agent_sync, args=(room_name,), daemon=True).start()
+    threading.Thread(target=create_room_sync, args=(room_name,), daemon=True).start()
  
     return jsonify({
         "token":     token,
