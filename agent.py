@@ -19,7 +19,7 @@ from mem0_helper import load_memories, save_memories
 import os
 import logging
 
-MEM0_API_KEY = os.getenv("MEM0_API_KEY")
+MEM0_API_KEY = (os.getenv("MEM0_API_KEY") or "").strip()
 USER_ID = "lloyd_smith"
 
 
