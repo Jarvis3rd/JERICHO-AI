@@ -633,11 +633,12 @@
         },
       });
 
+      let agentAudioEl = null;
+
       room.on(LivekitClient.RoomEvent.Connected, async () => {
         setState('listening');
         await room.localParticipant.setMicrophoneEnabled(true);
-        // Room now exists — trigger agent dispatch
-        fetch(`${RAILWAY_URL}/dispatch?room=${ROOM_NAME}`).catch(console.error);
+        // (removed the dead /dispatch call — the agent auto-joins lloyd-personal)
       });
 
       room.on(LivekitClient.RoomEvent.Disconnected, () => {
@@ -653,15 +654,19 @@
 
       room.on(LivekitClient.RoomEvent.TrackSubscribed, (track) => {
         if (track.kind === LivekitClient.Track.Kind.Audio) {
-          const el = track.attach();
-          el.autoplay = true;
-          document.body.appendChild(el);
+          if (agentAudioEl) { try { agentAudioEl.remove(); } catch (e) {} }
+          agentAudioEl = track.attach();
+          agentAudioEl.autoplay = true;
+          agentAudioEl.playsInline = true;
+          document.body.appendChild(agentAudioEl);
         }
       });
 
       room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track) => {
-        track.detach();
+        track.detach().forEach(el => el.remove());
+        agentAudioEl = null;
       });
+      
 
       await room.connect(url, token);
 
