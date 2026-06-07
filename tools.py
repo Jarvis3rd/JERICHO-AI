@@ -66,8 +66,8 @@ async def send_email(
         smtp_port = 587
         
         # Get credentials from environment variables
-        gmail_user = os.getenv("GMAIL_USER")
-        gmail_password = os.getenv("GMAIL_APP_PASSWORD")  # Use App Password, not regular password
+        gmail_user = (os.getenv("GMAIL_USER") or "").strip()
+        gmail_password = (os.getenv("GMAIL_APP_PASSWORD") or "").replace(" ", "").strip()  # kill display spaces + stray newlines
         
         if not gmail_user or not gmail_password:
             logging.error("Gmail credentials not found in environment variables")
@@ -101,8 +101,8 @@ async def send_email(
         logging.info(f"Email sent successfully to {to_email}")
         return f"Email sent successfully to {to_email}"
         
-    except smtplib.SMTPAuthenticationError:
-        logging.error("Gmail authentication failed")
+    except smtplib.SMTPAuthenticationError as e:
+        logging.error(f"Gmail authentication failed: {e}")
         return "Email sending failed: Authentication error. Please check your Gmail credentials."
     except smtplib.SMTPException as e:
         logging.error(f"SMTP error occurred: {e}")
