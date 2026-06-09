@@ -1,1 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy | Aperture Automations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <!--
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │ BEFORE PUBLISHING — confirm/replace each [BRACKETED] item:           │
+    │  • [EFFECTIVE DATE]                                                   │
+    │  • Entity is set to "Aperture Automations LLC, a California limited    │
+    │    liability company." (confirmed)                                    │
+    │  • The "Call recording" section — confirm whether your agents record/ │
+    │    transcribe calls, and adjust to match your ACTUAL practice.        │
+    │  • The subprocessor list — keep only the vendors you actually use.    │
+    │ This is a strong starting template, NOT legal advice. Have a lawyer   │
+    │ review it before it goes live.                                        │
+    └─────────────────────────────────────────────────────────────────────┘
+  -->
+  <style>
+    :root{
+      --bg:#05070f; --surface:#0b0f1e; --border:rgba(255,255,255,0.07);
+      --accent:#00d4ff; --accent2:#7b5cff; --text:#e8ecf5; --muted:#7a82a0;
+      --glow:rgba(0,212,255,0.15);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{
+      background:var(--bg); color:var(--text);
+      font-family:'DM Sans',sans-serif; font-size:16px; line-height:1.7;
+      overflow-x:hidden;
+    }
+    .grid-bg{
+      position:fixed; inset:0;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);
+      background-size:60px 60px; pointer-events:none; z-index:0;
+    }
+    nav{
+      position:sticky; top:0; z-index:10;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:1.25rem clamp(1.25rem,5vw,4rem);
+      background:rgba(5,7,15,0.8); backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--border);
+    }
+    nav .brand{
+      font-family:'Syne',sans-serif; font-weight:800; letter-spacing:0.04em;
+      font-size:0.95rem; color:var(--text); text-decoration:none;
+    }
+    nav .brand span{color:var(--accent);}
+    nav a.back{
+      color:var(--muted); text-decoration:none; font-size:0.9rem;
+      font-weight:500; transition:color .2s;
+    }
+    nav a.back:hover{color:var(--accent);}
+    main{
+      position:relative; z-index:1;
+      max-width:780px; margin:0 auto;
+      padding:clamp(2.5rem,6vw,5rem) clamp(1.25rem,5vw,2rem) 4rem;
+    }
+    .eyebrow{
+      font-family:'Syne',sans-serif; text-transform:uppercase;
+      letter-spacing:0.22em; font-size:0.72rem; font-weight:700;
+      color:var(--accent); margin-bottom:0.9rem;
+    }
+    h1{
+      font-family:'Syne',sans-serif; font-weight:800;
+      font-size:clamp(2rem,6vw,3rem); line-height:1.05; margin-bottom:0.75rem;
+    }
+    .updated{color:var(--muted); font-size:0.9rem; margin-bottom:2.5rem;}
+    h2{
+      font-family:'Syne',sans-serif; font-weight:700;
+      font-size:clamp(1.15rem,3.5vw,1.45rem); margin:2.6rem 0 0.85rem;
+      padding-top:1.6rem; border-top:1px solid var(--border);
+    }
+    h2 .num{color:var(--accent2); margin-right:0.6rem; font-weight:800;}
+    h3{font-family:'Syne',sans-serif; font-weight:600; font-size:1.02rem; margin:1.4rem 0 0.5rem; color:var(--text);}
+    p,li{color:#cdd3e4;}
+    p{margin-bottom:1rem;}
+    ul{margin:0 0 1rem 1.25rem;}
+    li{margin-bottom:0.5rem;}
+    a{color:var(--accent); text-decoration:none;}
+    a:hover{text-decoration:underline;}
+    strong{color:var(--text);}
+    .callout{
+      background:var(--surface); border:1px solid var(--border);
+      border-left:3px solid var(--accent); border-radius:10px;
+      padding:1.1rem 1.25rem; margin:1.4rem 0; color:#cdd3e4;
+    }
+    .lead{font-size:1.05rem; color:#d7dcec;}
+    footer{
+      position:relative; z-index:1;
+      display:flex; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; gap:1rem;
+      padding:2rem clamp(1.25rem,5vw,4rem);
+      border-top:1px solid var(--border); color:var(--muted); font-size:0.85rem;
+    }
+    footer a{color:var(--muted);}
+    footer a:hover{color:var(--accent);}
+    .footer-legal a{margin:0 0.4rem;}
+    @media(max-width:640px){
+      footer{flex-direction:column; text-align:center; gap:0.75rem;}
+    }
+  </style>
+</head>
+<body>
+  <div class="grid-bg"></div>
 
+  <nav>
+    <a class="brand" href="/">APERTURE <span>AUTOMATIONS</span></a>
+    <a class="back" href="/">← Back to site</a>
+  </nav>
+
+  <main>
+    <p class="eyebrow">Legal</p>
+    <h1>Privacy Policy</h1>
+    <p class="updated">Effective date: [EFFECTIVE DATE]</p>
+
+    <p class="lead">This Privacy Policy explains how Aperture Automations LLC, a California limited liability company (“Aperture Automations,” “we,” “us,” or “our”), collects, uses, and protects information in connection with our website and our AI agent services, including the Jericho voice agent and our messaging, email, and scheduling automation.</p>
+
+    <h2><span class="num">1.</span>Who we are</h2>
+    <p>Aperture Automations is an AI automation provider based in Fresno, California, offering managed AI voice agents and related automation to businesses across the United States. You can reach us at <a href="mailto:info@apertureautomations.ai">info@apertureautomations.ai</a> or P.O. Box 26514, Fresno, CA 93729.</p>
+
+    <h2><span class="num">2.</span>Scope of this policy</h2>
+    <p>This policy covers two distinct contexts:</p>
+    <ul>
+      <li><strong>Our website</strong> — information from visitors who browse the site or book a call with us.</li>
+      <li><strong>Our services</strong> — information processed when we operate AI agents on behalf of a business client. For that client data, we generally act as a <strong>service provider / processor</strong> on the client’s behalf, and the client’s own privacy notice and our service agreement govern the details.</li>
+    </ul>
+
+    <h2><span class="num">3.</span>Information we collect</h2>
+    <h3>Information you give us</h3>
+    <p>When you book a demo, we use Calendly to schedule the call. Through that booking you may provide your name, email address, phone number, and any details you choose to share. If you email us, we receive your message and contact details.</p>
+    <h3>Information processed through our services</h3>
+    <p>When we run an AI agent for a client, the agent may handle communications from that client’s customers and prospects. Depending on the configuration, this can include names, phone numbers, email addresses, the content of calls and messages, scheduling details, and information synced with the client’s CRM or calendar.</p>
+    <h3>Information collected automatically</h3>
+    <p>Our website does <strong>not</strong> use advertising or analytics tracking cookies. Our hosting provider may keep standard server logs (such as IP address and request time) for security and reliability.</p>
+
+    <h2><span class="num">4.</span>How we use information</h2>
+    <ul>
+      <li>To respond to inquiries, schedule and conduct demo calls, and provide our services.</li>
+      <li>To build, voice, deploy, and continuously improve AI agents configured for each client.</li>
+      <li>To route qualified leads, log interactions, and integrate with the tools a client has authorized.</li>
+      <li>To maintain security, prevent abuse, and comply with legal obligations.</li>
+    </ul>
+
+    <h2><span class="num">5.</span>Call handling and recording</h2>
+    <!-- CONFIRM: edit this to match your ACTUAL practice. If you do NOT record audio,
+         say so plainly. If you DO record/transcribe, California (Penal Code §632) and
+         several other states require consent of ALL parties — your agent should give a
+         clear recording notice at the start of each call. -->
+    <div class="callout">
+      When we operate an AI voice agent, calls are processed in real time so the agent can understand and respond. Depending on the client’s configuration, calls may be recorded, transcribed, and summarized to deliver and improve the service. <strong>Where calls are recorded, all parties are notified at the start of the call,</strong> consistent with California’s all-party consent law and similar laws in other states.
+    </div>
+
+    <h2><span class="num">6.</span>How we share information</h2>
+    <p>We do <strong>not</strong> sell personal information. We share information only as needed to operate our services, with trusted vendors (“subprocessors”) acting on our instructions. Depending on the service, these may include:</p>
+    <ul>
+      <li><strong>OpenAI</strong> — language and real-time voice processing</li>
+      <li><strong>LiveKit</strong> — real-time voice transport</li>
+      <li><strong>mem0</strong> — agent memory</li>
+      <li><strong>Resend</strong> — transactional email and message delivery</li>
+      <li><strong>Google</strong> — calendar and email integration, where authorized by a client</li>
+      <li><strong>Calendly</strong> — demo scheduling</li>
+      <li><strong>GoHighLevel</strong> — CRM and workflow automation</li>
+      <li><strong>Hosting provider</strong> — secure hosting of our infrastructure</li>
+    </ul>
+    <p>We may also disclose information if required by law or to protect our rights, users, or the public.</p>
+
+    <h2><span class="num">7.</span>Our role with client data</h2>
+    <p>When we process information on behalf of a business client, we do so under that client’s instructions and our service agreement. The client is responsible for having a lawful basis to collect and process their customers’ information and for providing required notices and consents. A separate data processing agreement may govern these responsibilities.</p>
+
+    <h2><span class="num">8.</span>Data retention</h2>
+    <p>We keep information only as long as needed for the purposes described here, to provide our services, and to meet legal, accounting, or security requirements, after which we delete or de-identify it. Retention for client data follows the applicable service agreement.</p>
+
+    <h2><span class="num">9.</span>Security</h2>
+    <p>We use reasonable technical and organizational measures — including access controls, encryption in transit, and secrets management — to protect information. No method of transmission or storage is completely secure, and we cannot guarantee absolute security.</p>
+
+    <h2><span class="num">10.</span>Your privacy rights</h2>
+    <p>Depending on where you live, you may have rights to access, correct, delete, or limit the use of your personal information, and to opt out of certain processing. California residents have rights under the CCPA/CPRA, including the right to know, delete, and correct, and the right not to be discriminated against for exercising those rights. To make a request, email <a href="mailto:info@apertureautomations.ai">info@apertureautomations.ai</a>. If your information was processed on behalf of one of our clients, we will direct your request to that client.</p>
+
+    <h2><span class="num">11.</span>Children’s privacy</h2>
+    <p>Our website and services are intended for businesses and adults. They are not directed to children, and we do not knowingly collect personal information from children.</p>
+
+    <h2><span class="num">12.</span>Third-party links and services</h2>
+    <p>Our site and services may link to or integrate with third-party tools that have their own privacy practices. We are not responsible for those third parties, and we encourage you to review their policies.</p>
+
+    <h2><span class="num">13.</span>Changes to this policy</h2>
+    <p>We may update this policy from time to time. When we do, we will revise the “Effective date” above and, where appropriate, provide additional notice.</p>
+
+    <h2><span class="num">14.</span>Contact us</h2>
+    <p>Questions about this policy or your information? Email <a href="mailto:info@apertureautomations.ai">info@apertureautomations.ai</a> or write to Aperture Automations, P.O. Box 26514, Fresno, CA 93729.</p>
+  </main>
+
+  <footer>
+    <p>© 2026 Aperture Automations. All rights reserved.</p>
+    <div class="footer-legal">
+      <a href="/privacy.html">Privacy Policy</a> ·
+      <a href="/terms.html">Terms of Service</a>
+    </div>
+    <a href="mailto:info@apertureautomations.ai">info@apertureautomations.ai</a>
+  </footer>
+</body>
+</html>
