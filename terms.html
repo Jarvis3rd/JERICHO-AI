@@ -1,1 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms of Service | Aperture Automations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <!--
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │ BEFORE PUBLISHING — confirm/replace each [BRACKETED] item:           │
+    │  • [EFFECTIVE DATE]                                                   │
+    │  • Entity set to "Aperture Automations LLC, a CA LLC." (confirmed)    │
+    │  • Governing law: California (confirmed).                             │
+    │ This is a strong starting template, NOT legal advice. Have a lawyer  │
+    │ review it before it goes live — especially the liability, AI         │
+    │ disclaimer, and consent sections.                                    │
+    └─────────────────────────────────────────────────────────────────────┘
+  -->
+  <style>
+    :root{
+      --bg:#05070f; --surface:#0b0f1e; --border:rgba(255,255,255,0.07);
+      --accent:#00d4ff; --accent2:#7b5cff; --text:#e8ecf5; --muted:#7a82a0;
+      --glow:rgba(0,212,255,0.15);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{
+      background:var(--bg); color:var(--text);
+      font-family:'DM Sans',sans-serif; font-size:16px; line-height:1.7;
+      overflow-x:hidden;
+    }
+    .grid-bg{
+      position:fixed; inset:0;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);
+      background-size:60px 60px; pointer-events:none; z-index:0;
+    }
+    nav{
+      position:sticky; top:0; z-index:10;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:1.25rem clamp(1.25rem,5vw,4rem);
+      background:rgba(5,7,15,0.8); backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--border);
+    }
+    nav .brand{
+      font-family:'Syne',sans-serif; font-weight:800; letter-spacing:0.04em;
+      font-size:0.95rem; color:var(--text); text-decoration:none;
+    }
+    nav .brand span{color:var(--accent);}
+    nav a.back{color:var(--muted); text-decoration:none; font-size:0.9rem; font-weight:500; transition:color .2s;}
+    nav a.back:hover{color:var(--accent);}
+    main{
+      position:relative; z-index:1;
+      max-width:780px; margin:0 auto;
+      padding:clamp(2.5rem,6vw,5rem) clamp(1.25rem,5vw,2rem) 4rem;
+    }
+    .eyebrow{
+      font-family:'Syne',sans-serif; text-transform:uppercase;
+      letter-spacing:0.22em; font-size:0.72rem; font-weight:700;
+      color:var(--accent); margin-bottom:0.9rem;
+    }
+    h1{font-family:'Syne',sans-serif; font-weight:800; font-size:clamp(2rem,6vw,3rem); line-height:1.05; margin-bottom:0.75rem;}
+    .updated{color:var(--muted); font-size:0.9rem; margin-bottom:2.5rem;}
+    h2{
+      font-family:'Syne',sans-serif; font-weight:700;
+      font-size:clamp(1.15rem,3.5vw,1.45rem); margin:2.6rem 0 0.85rem;
+      padding-top:1.6rem; border-top:1px solid var(--border);
+    }
+    h2 .num{color:var(--accent2); margin-right:0.6rem; font-weight:800;}
+    p,li{color:#cdd3e4;}
+    p{margin-bottom:1rem;}
+    ul{margin:0 0 1rem 1.25rem;}
+    li{margin-bottom:0.5rem;}
+    a{color:var(--accent); text-decoration:none;}
+    a:hover{text-decoration:underline;}
+    strong{color:var(--text);}
+    .callout{
+      background:var(--surface); border:1px solid var(--border);
+      border-left:3px solid var(--accent2); border-radius:10px;
+      padding:1.1rem 1.25rem; margin:1.4rem 0; color:#cdd3e4;
+    }
+    .lead{font-size:1.05rem; color:#d7dcec;}
+    footer{
+      position:relative; z-index:1;
+      display:flex; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; gap:1rem;
+      padding:2rem clamp(1.25rem,5vw,4rem);
+      border-top:1px solid var(--border); color:var(--muted); font-size:0.85rem;
+    }
+    footer a{color:var(--muted);}
+    footer a:hover{color:var(--accent);}
+    .footer-legal a{margin:0 0.4rem;}
+    @media(max-width:640px){footer{flex-direction:column; text-align:center; gap:0.75rem;}}
+  </style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+
+  <nav>
+    <a class="brand" href="/">APERTURE <span>AUTOMATIONS</span></a>
+    <a class="back" href="/">← Back to site</a>
+  </nav>
+
+  <main>
+    <p class="eyebrow">Legal</p>
+    <h1>Terms of Service</h1>
+    <p class="updated">Effective date: [EFFECTIVE DATE]</p>
+
+    <p class="lead">These Terms of Service (“Terms”) govern your use of the website and services of Aperture Automations LLC, a California limited liability company (“Aperture Automations,” “we,” “us,” or “our”). By using our website or services, you agree to these Terms.</p>
+
+    <h2><span class="num">1.</span>About our services</h2>
+    <p>Aperture Automations provides managed AI automation, including the Jericho AI voice agent and related messaging, email, and scheduling automation. Our website is informational; demos are scheduled through a third-party booking tool. Any paid engagement is provided under a separate written agreement or statement of work (“Service Agreement”), which controls if it conflicts with these Terms.</p>
+
+    <h2><span class="num">2.</span>Eligibility</h2>
+    <p>You must be at least 18 years old and, if acting for a business, authorized to bind that business to these Terms.</p>
+
+    <h2><span class="num">3.</span>Use of the website</h2>
+    <p>You agree to use the website lawfully and not to interfere with its operation, attempt unauthorized access, or use it to transmit harmful or unlawful content.</p>
+
+    <h2><span class="num">4.</span>Client responsibilities and consent</h2>
+    <!-- This pushes lawful-basis / consent obligations to the client, but you may still
+         share responsibility. A lawyer should confirm the allocation for your model. -->
+    <div class="callout">
+      If we deploy an AI agent for your business, <strong>you are responsible for ensuring you have the legal right and any required consent</strong> to contact, call, text, email, or record the individuals the agent interacts with. This includes obligations under laws such as the TCPA (automated calls and texts) and state call-recording laws (including California’s all-party consent requirement). We will configure the agent to support compliant practices, such as recording notices, but you remain responsible for your own legal compliance.
+    </div>
+
+    <h2><span class="num">5.</span>Intellectual property</h2>
+    <p>The website, our software, configurations, and brand are owned by Aperture Automations. You retain ownership of your own business data and content. Under a Service Agreement, we grant you the right to use the agent we deploy for you; that right ends if the engagement ends.</p>
+
+    <h2><span class="num">6.</span>Third-party services</h2>
+    <p>Our services rely on third-party platforms (for example, voice, language model, messaging, calendar, and CRM providers). Your use of the services may be subject to those providers’ terms, and we are not responsible for their availability or actions.</p>
+
+    <h2><span class="num">7.</span>AI-generated output</h2>
+    <div class="callout">
+      AI agents generate responses automatically and may occasionally be inaccurate, incomplete, or unexpected. Our agents are tools to assist your business and are <strong>not</strong> a substitute for professional, legal, medical, or financial advice. You are responsible for reviewing and supervising how the agent is used in your operations.
+    </div>
+
+    <h2><span class="num">8.</span>Disclaimers</h2>
+    <p>The website and services are provided “as is” and “as available,” without warranties of any kind, whether express or implied, including merchantability, fitness for a particular purpose, and non-infringement. We do not warrant that the services will be uninterrupted, error-free, or secure.</p>
+
+    <h2><span class="num">9.</span>Limitation of liability</h2>
+    <p>To the maximum extent permitted by law, Aperture Automations will not be liable for any indirect, incidental, special, consequential, or punitive damages, or for lost profits, revenue, data, or goodwill. Our total liability arising out of or relating to the services will not exceed the amount you paid us in the three months before the event giving rise to the claim.</p>
+
+    <h2><span class="num">10.</span>Indemnification</h2>
+    <p>You agree to indemnify and hold harmless Aperture Automations from claims arising out of your use of the services, your data, or your breach of these Terms or applicable law — including claims related to contacting or recording individuals without required consent.</p>
+
+    <h2><span class="num">11.</span>Termination</h2>
+    <p>We may suspend or end access to the website or services if these Terms or a Service Agreement are violated. Provisions that by their nature should survive termination — such as intellectual property, disclaimers, limitation of liability, and indemnification — will survive.</p>
+
+    <h2><span class="num">12.</span>Governing law</h2>
+    <p>These Terms are governed by the laws of the State of California, without regard to its conflict-of-laws rules. Any dispute will be resolved in the state or federal courts located in Fresno County, California, unless a Service Agreement specifies otherwise.</p>
+
+    <h2><span class="num">13.</span>Changes to these Terms</h2>
+    <p>We may update these Terms from time to time. Continued use of the website or services after an update means you accept the revised Terms. We will revise the “Effective date” above when we make changes.</p>
+
+    <h2><span class="num">14.</span>Contact us</h2>
+    <p>Questions about these Terms? Email <a href="mailto:info@apertureautomations.ai">info@apertureautomations.ai</a> or write to Aperture Automations, P.O. Box 26514, Fresno, CA 93729.</p>
+  </main>
+
+  <footer>
+    <p>© 2026 Aperture Automations. All rights reserved.</p>
+    <div class="footer-legal">
+      <a href="/privacy.html">Privacy Policy</a> ·
+      <a href="/terms.html">Terms of Service</a>
+    </div>
+    <a href="mailto:info@apertureautomations.ai">info@apertureautomations.ai</a>
+  </footer>
+</body>
+</html>
 
