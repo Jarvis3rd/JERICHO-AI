@@ -19,6 +19,8 @@
       --text: #e8ecf5;
       --muted: #6a7290;
       --danger: #ff4f4f;
+      /* Avatar presence: ~2x on desktop, auto-shrinks to fit phones */
+      --avatar: clamp(220px, 60vw, 400px);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -87,7 +89,7 @@
     /* ── AVATAR WRAP ── */
     .avatar-wrap {
       position: relative;
-      width: 210px; height: 210px;
+      width: var(--avatar); height: var(--avatar);
       margin-bottom: 2.2rem;
       opacity: 0; animation: fadeUp 0.8s 0.3s ease forwards;
       display: flex; align-items: center; justify-content: center;
@@ -101,13 +103,13 @@
       top: 50%; left: 50%;
     }
     .ring-1 {
-      width: 224px; height: 224px;
+      width: calc(var(--avatar) * 1.067); height: calc(var(--avatar) * 1.067);
       transform: translate(-50%, -50%);
       border: 1px solid rgba(0,212,255,0.1);
       transition: border-color 0.5s;
     }
     .ring-2 {
-      width: 248px; height: 248px;
+      width: calc(var(--avatar) * 1.181); height: calc(var(--avatar) * 1.181);
       transform: translate(-50%, -50%);
       border: 1px solid rgba(0,212,255,0.05);
       transition: border-color 0.5s;
@@ -118,7 +120,7 @@
     /* Scan pulse ring */
     .scan-ring {
       position: absolute;
-      width: 224px; height: 224px;
+      width: calc(var(--avatar) * 1.067); height: calc(var(--avatar) * 1.067);
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       border-radius: 50%;
@@ -136,7 +138,7 @@
 
     /* ── MASK SVG ── */
     .mask-svg {
-      width: 210px; height: 210px;
+      width: var(--avatar); height: var(--avatar);
       overflow: visible;
       filter: drop-shadow(0 8px 32px rgba(0,0,0,0.7));
     }
@@ -235,10 +237,7 @@
       0%,100% { opacity: 1; } 50% { opacity: 0.35; }
     }
 
-    @media (max-width: 380px) {
-      .avatar-wrap { width: 180px; height: 180px; }
-      .mask-svg { width: 180px; height: 180px; }
-    }
+    /* Avatar sizes responsively via --avatar (clamp), so no fixed small-screen override is needed. */
   </style>
 </head>
 <body>
