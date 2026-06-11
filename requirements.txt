@@ -15,3 +15,5 @@ duckduckgo-search>=6.0.0
 flask
 flask-cors
 PyJWT
+gunicorn
+twilio
