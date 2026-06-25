@@ -320,6 +320,28 @@
 </div>
 
 <script>
+/* ---------------- GHL LEAD CAPTURE ---------------- */
+const GHL_WEBHOOK = "https://services.leadconnectorhq.com/hooks/pRqi2BjUB7oRnI9Mse2x/webhook-trigger/1ae9425c-d347-47be-a518-c93ca35f36d8";
+const LEAD = {};            /* holds the contact captured at opt-in so results can re-send it */
+
+/* Fire-and-forget: never blocks the page, never errors out the user if the network hiccups.
+   Uses text/plain to avoid a CORS preflight; GHL parses the JSON body and exposes the fields. */
+function sendToGHL(extra){
+  try{
+    const payload = Object.assign({
+      source: "Retirement Readiness Funnel",
+      page_url: location.href
+    }, LEAD, extra || {});
+    fetch(GHL_WEBHOOK, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=UTF-8" },
+      body: JSON.stringify(payload),
+      keepalive: true        /* lets the request finish even as the page navigates */
+    }).catch(()=>{});
+  }catch(e){ /* swallow — lead capture must never break the funnel */ }
+}
+
 /* ---------------- CHECKLIST DATA (general & educational — no advice) ---------------- */
 const SECTIONS = [
   { t:"Your timeline & vision", items:[
@@ -390,12 +412,21 @@ form.addEventListener('submit',(e)=>{
   if(phone.replace(/\D/g,'').length<10){fail('f-phone');ok=false;}
   if(!ok) return;
 
-  /* ===== DEPLOY NOTE =====================================================
-     In GoHighLevel: capture this lead by EITHER (a) using GHL's native form
-     element, OR (b) POSTing {name,email,phone} to a GHL Inbound Webhook
-     (same trigger style you built for Concierge Caller) so it lands in the
-     CRM and can fire the nurture sequence. The demo just advances below.
-     ===================================================================== */
+  /* Store the contact + fire the FIRST webhook now — this captures the lead
+     even if they never finish the checklist (where most funnels lose people). */
+  const firstName = name.split(' ')[0] || name;
+  const lastName  = name.split(' ').slice(1).join(' ');
+  LEAD.full_name  = name;
+  LEAD.first_name = firstName;
+  LEAD.last_name  = lastName;
+  LEAD.email      = email;
+  LEAD.phone      = phone;
+  sendToGHL({
+    readiness_score: "",
+    readiness_tier:  "",
+    readiness_label: "",
+    stage: "opted_in"
+  });
 
   document.getElementById('greeting').textContent =
     (name.split(' ')[0] ? name.split(' ')[0]+", let's see where you stand." : "Let's see where you stand.");
@@ -423,6 +454,15 @@ gaugeFill.style.strokeDashoffset=C;
 document.getElementById('seeResults').addEventListener('click',()=>{
   const pct=currentPct();
   const tier=tierFor(pct);
+
+  /* SECOND webhook — same contact, now stamped with score + red/amber/green tier */
+  sendToGHL({
+    readiness_score: String(pct),
+    readiness_tier:  tier.cls.replace('r-',''),   /* green | amber | red */
+    readiness_label: tier.head,
+    stage: "completed"
+  });
+
   const top=document.getElementById('resultTop');
   top.className='result-top '+tier.cls;
   document.getElementById('resultHeadline').textContent=tier.head;
