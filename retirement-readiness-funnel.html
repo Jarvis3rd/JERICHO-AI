@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Am I Financially Ready to Retire? — Free Readiness Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16213E;          /* deep navy — hero + headings */
+    --ink-soft:#1F2A44;
+    --body:#2A2E37;          /* warm near-black body text */
+    --muted:#5B6473;
+    --paper:#FFFFFF;
+    --mist:#F5F7FA;          /* soft section background */
+    --line:#E4E8EF;          /* hairlines / card borders */
+    --gold:#BD9A4A;          /* premium muted gold — CTA */
+    --gold-deep:#A8863B;
+    --teal:#2C7A7B;          /* calm accent / progress */
+    --green:#3F9D6B;
+    --amber:#D2A03C;
+    --red:#C25A45;
+    --shadow:0 10px 40px rgba(22,33,62,.08);
+    --shadow-soft:0 4px 18px rgba(22,33,62,.06);
+    --serif:'Fraunces',Georgia,'Times New Roman',serif;
+    --sans:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;font-family:var(--sans);color:var(--body);
+    background:var(--paper);font-size:18px;line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:var(--serif);color:var(--ink);font-weight:600;line-height:1.12;margin:0;letter-spacing:-.01em;}
+  p{margin:0 0 1rem;}
+  a{color:inherit;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px;}
+  .narrow{max-width:760px;margin:0 auto;padding:0 24px;}
+  .eyebrow{font-size:.8rem;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:14px;}
+  .hidden{display:none !important;}
+
+  /* ---------- NAV ---------- */
+  .nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 24px;max-width:1080px;margin:0 auto;}
+  .brand{display:flex;flex-direction:column;line-height:1.15;}
+  .brand b{font-family:var(--serif);font-size:1.18rem;color:var(--ink);font-weight:600;}
+  .brand span{font-size:.74rem;color:var(--muted);letter-spacing:.02em;}
+  .nav-score{display:flex;align-items:center;gap:12px;font-size:.85rem;color:var(--muted);}
+  .nav-score .pct{font-family:var(--serif);font-size:1.35rem;color:var(--ink);font-weight:600;min-width:3.2ch;text-align:right;}
+  .nav-bar{width:120px;height:8px;border-radius:99px;background:var(--line);overflow:hidden;}
+  .nav-bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--green));transition:width .5s cubic-bezier(.2,.7,.2,1);}
+
+  /* ---------- HERO ---------- */
+  .hero{background:radial-gradient(120% 140% at 80% -10%,#243355 0%,var(--ink) 55%);color:#EAF0FB;padding:88px 0 120px;position:relative;overflow:hidden;}
+  .hero .wrap{position:relative;z-index:2;}
+  .hero .eyebrow{color:#9FE0DE;}
+  .hero h1{color:#fff;font-size:clamp(2.3rem,5.4vw,3.7rem);max-width:16ch;}
+  .hero p.lead{color:#C4CFE4;font-size:1.18rem;max-width:46ch;margin-top:22px;}
+  .hero .reassure{margin-top:26px;display:inline-flex;align-items:center;gap:10px;font-size:.92rem;color:#9FB0D0;}
+  .hero .reassure b{color:#EAF0FB;font-weight:500;}
+  .hero-arc{position:absolute;right:-120px;top:-40px;width:520px;height:520px;border-radius:50%;border:1px solid rgba(159,224,222,.18);z-index:1;}
+  .hero-arc::after{content:"";position:absolute;inset:60px;border-radius:50%;border:1px solid rgba(159,224,222,.12);}
+
+  /* form card overlapping hero */
+  .form-deck{margin-top:-70px;position:relative;z-index:5;}
+  .form-card{background:var(--paper);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:34px;max-width:520px;margin-left:auto;}
+  .form-card h2{font-size:1.5rem;margin-bottom:6px;}
+  .form-card .sub{color:var(--muted);font-size:.96rem;margin-bottom:22px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:.82rem;font-weight:700;color:var(--ink);margin-bottom:6px;letter-spacing:.01em;}
+  .field input{width:100%;padding:13px 15px;border:1px solid var(--line);border-radius:10px;font-family:var(--sans);font-size:1rem;color:var(--body);background:var(--mist);transition:border-color .15s,background .15s;}
+  .field input:focus{outline:none;border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(44,122,123,.12);}
+  .field .err{color:var(--red);font-size:.78rem;margin-top:5px;display:none;}
+  .field.invalid .err{display:block;}
+  .field.invalid input{border-color:var(--red);background:#fdf6f4;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;border:none;border-radius:11px;font-family:var(--sans);font-weight:700;font-size:1rem;padding:15px 26px;transition:transform .12s,background .15s,box-shadow .15s;text-decoration:none;}
+  .btn-gold{background:var(--gold);color:#231C07;width:100%;box-shadow:0 6px 18px rgba(189,154,74,.32);}
+  .btn-gold:hover{background:var(--gold-deep);transform:translateY(-1px);}
+  .btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line);}
+  .form-note{font-size:.74rem;color:var(--muted);margin-top:14px;line-height:1.5;}
+
+  /* ---------- DISCOVER ---------- */
+  section{padding:74px 0;}
+  .discover h2{font-size:clamp(1.7rem,3.4vw,2.3rem);max-width:18ch;margin-bottom:10px;}
+  .discover .lead{color:var(--muted);max-width:54ch;margin-bottom:40px;}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+  .disc-item{background:var(--mist);border:1px solid var(--line);border-radius:14px;padding:26px;}
+  .disc-item .ix{font-family:var(--serif);font-size:1.1rem;color:var(--teal);font-weight:600;margin-bottom:10px;display:block;}
+  .disc-item h3{font-size:1.16rem;margin-bottom:7px;}
+  .disc-item p{color:var(--muted);font-size:.95rem;margin:0;}
+
+  /* ---------- ABOUT ---------- */
+  .about{background:var(--mist);}
+  .about-grid{display:grid;grid-template-columns:120px 1fr;gap:30px;align-items:start;}
+  .avatar{width:120px;height:120px;border-radius:50%;background:linear-gradient(150deg,#243355,var(--ink));display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:2.4rem;color:#EAF0FB;box-shadow:var(--shadow-soft);}
+  .about h2{font-size:1.7rem;margin-bottom:6px;}
+  .about .role{color:var(--teal);font-weight:700;font-size:.9rem;letter-spacing:.02em;margin-bottom:16px;}
+  .about p{color:var(--body);max-width:60ch;}
+
+  /* ---------- CHECKLIST ---------- */
+  .check-hero{background:radial-gradient(120% 140% at 20% -10%,#243355 0%,var(--ink) 60%);color:#EAF0FB;padding:62px 0 56px;}
+  .check-hero h1{color:#fff;font-size:clamp(2rem,4.6vw,3rem);max-width:18ch;}
+  .check-hero p{color:#C4CFE4;max-width:50ch;margin-top:16px;}
+  .check-body{padding:48px 0 30px;}
+  .csection{background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-soft);padding:28px 30px;margin-bottom:20px;}
+  .csection .chead{display:flex;align-items:baseline;gap:14px;margin-bottom:18px;}
+  .csection .cnum{font-family:var(--serif);font-size:1.05rem;color:var(--teal);font-weight:600;}
+  .csection h3{font-size:1.3rem;}
+  .check-row{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-top:1px solid var(--line);cursor:pointer;}
+  .check-row:first-of-type{border-top:none;}
+  .check-row input{position:absolute;opacity:0;width:1px;height:1px;}
+  .box{flex:0 0 auto;width:26px;height:26px;border-radius:8px;border:2px solid #CBD3E0;background:#fff;display:flex;align-items:center;justify-content:center;transition:all .15s;margin-top:1px;}
+  .box svg{width:15px;height:15px;opacity:0;transform:scale(.5);transition:all .15s;}
+  .check-row input:checked + .box{background:var(--teal);border-color:var(--teal);}
+  .check-row input:checked + .box svg{opacity:1;transform:scale(1);}
+  .check-row input:focus-visible + .box{box-shadow:0 0 0 3px rgba(44,122,123,.25);}
+  .check-row .ctext{font-size:1.02rem;color:var(--body);user-select:none;}
+  .check-row:hover .box{border-color:var(--teal);}
+
+  .results-cta{text-align:center;padding:18px 0 8px;}
+  .results-cta .btn-gold{width:auto;min-width:280px;}
+  .results-cta .hint{color:var(--muted);font-size:.85rem;margin-top:12px;}
+
+  /* ---------- RESULT CARD ---------- */
+  .result{padding:20px 0 10px;}
+  .result-card{border-radius:20px;box-shadow:var(--shadow);overflow:hidden;border:1px solid var(--line);}
+  .result-top{padding:42px 36px;text-align:center;color:#fff;}
+  .result-top.r-green{background:linear-gradient(135deg,#3F9D6B,#2F7E54);}
+  .result-top.r-amber{background:linear-gradient(135deg,#D2A03C,#B9852A);}
+  .result-top.r-red{background:linear-gradient(135deg,#C25A45,#A6452F);}
+  .gauge{width:160px;height:160px;margin:0 auto 18px;position:relative;}
+  .gauge svg{transform:rotate(-90deg);}
+  .gauge .track{fill:none;stroke:rgba(255,255,255,.28);stroke-width:12;}
+  .gauge .fill{fill:none;stroke:#fff;stroke-width:12;stroke-linecap:round;transition:stroke-dashoffset 1.1s cubic-bezier(.2,.7,.2,1);}
+  .gauge .num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:2.5rem;font-weight:600;color:#fff;}
+  .result-top h2{color:#fff;font-size:1.9rem;max-width:20ch;margin:0 auto;}
+  .result-body{background:#fff;padding:34px 36px;}
+  .result-body p{color:var(--body);max-width:60ch;margin:0 auto 14px;text-align:center;}
+  .result-disclaim{font-size:.8rem;color:var(--muted);text-align:center;max-width:54ch;margin:18px auto 0;font-style:italic;}
+  .result-cta-deck{background:var(--ink);color:#EAF0FB;padding:42px 36px;text-align:center;}
+  .result-cta-deck h3{color:#fff;font-size:1.6rem;margin-bottom:10px;}
+  .result-cta-deck p{color:#C4CFE4;max-width:44ch;margin:0 auto 24px;}
+
+  /* ---------- FOOTER ---------- */
+  .foot{background:var(--ink);color:#9FB0D0;padding:46px 0;font-size:.86rem;}
+  .foot .wrap{display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;align-items:flex-start;}
+  .foot b{color:#EAF0FB;font-family:var(--serif);font-weight:600;font-size:1.05rem;}
+  .foot .disclaim{max-width:62ch;line-height:1.6;color:#8294B4;font-size:.8rem;margin-top:14px;}
+  .foot a{color:#9FE0DE;text-decoration:none;}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:760px){
+    body{font-size:17px;}
+    .hero{padding:64px 0 100px;}
+    .form-card{margin:0 auto;padding:26px;}
+    .form-deck{margin-top:-64px;}
+    .two-col{grid-template-columns:1fr;}
+    .about-grid{grid-template-columns:1fr;gap:18px;}
+    .avatar{width:88px;height:88px;font-size:1.9rem;}
+    .nav-bar{width:78px;}
+    .hero-arc{display:none;}
+    .results-cta .btn-gold{width:100%;min-width:0;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important;scroll-behavior:auto !important;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= PAGE 1 : OPT-IN ================= -->
+<div id="page-optin">
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="brand"><b>Sofia Marin</b><span>Financial Advisor · Fresno, CA</span></div>
+      <a href="#start" class="btn btn-ghost" style="padding:9px 18px;font-size:.9rem;">Get the free check</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-arc"></div>
+    <div class="wrap">
+      <div class="eyebrow">Free 2-minute self-check</div>
+      <h1>Am I financially ready to retire?</h1>
+      <p class="lead">A calm, clear way to see where you stand — across the five areas that matter most — without the jargon or the sales pitch.</p>
+      <div class="reassure">✓ <b>No cost, no pressure.</b> Just clarity.</div>
+    </div>
+  </header>
+
+  <div class="wrap form-deck" id="start">
+    <div class="form-card">
+      <h2>See your readiness in 2 minutes</h2>
+      <p class="sub">Answer 15 quick questions and get a personalized readiness snapshot. Enter your details to begin.</p>
+      <form id="optinForm" novalidate>
+        <div class="field" id="f-name">
+          <label for="name">Your name</label>
+          <input type="text" id="name" name="name" autocomplete="name" placeholder="First and last name">
+          <div class="err">Please enter your name.</div>
+        </div>
+        <div class="field" id="f-email">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" autocomplete="email" placeholder="you@email.com">
+          <div class="err">Please enter a valid email.</div>
+        </div>
+        <div class="field" id="f-phone">
+          <label for="phone">Phone</label>
+          <input type="tel" id="phone" name="phone" autocomplete="tel" placeholder="(559) 555-1234">
+          <div class="err">Please enter a valid phone number.</div>
+        </div>
+        <button type="submit" class="btn btn-gold">Start my readiness check →</button>
+        <p class="form-note">By starting, you agree to be contacted about your results. We never share your information. This tool offers general information, not personalized financial advice.</p>
+      </form>
+    </div>
+  </div>
+
+  <section class="discover">
+    <div class="wrap">
+      <div class="eyebrow">What you'll discover</div>
+      <h2>A clear read on the five pillars of retirement readiness</h2>
+      <p class="lead">No spreadsheets, no homework. Just a few honest questions and a snapshot you can actually use.</p>
+      <div class="two-col">
+        <div class="disc-item"><span class="ix">01</span><h3>Where you're already strong</h3><p>See the areas you've quietly got handled — sometimes you're further along than it feels.</p></div>
+        <div class="disc-item"><span class="ix">02</span><h3>The gaps worth a look</h3><p>Spot the few areas that tend to get overlooked, before they become surprises.</p></div>
+        <div class="disc-item"><span class="ix">03</span><h3>A simple readiness score</h3><p>One easy-to-read snapshot across timeline, spending, income, safety net, and plan.</p></div>
+        <div class="disc-item"><span class="ix">04</span><h3>A calm next step</h3><p>If you'd like, a no-pressure conversation to turn your snapshot into a plan.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="about">
+    <div class="wrap">
+      <div class="about-grid">
+        <div class="avatar">SM</div>
+        <div>
+          <div class="eyebrow" style="color:var(--teal)">Your guide</div>
+          <h2>Sofia Marin</h2>
+          <div class="role">Financial Advisor · Fresno, CA</div>
+          <p>I help working families and small-business owners feel clear and calm about their money. My job isn't to impress you with jargon — it's to help you understand your own numbers and feel in control of them. This free check is a no-pressure place to start.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="wrap">
+      <div>
+        <b>Sofia Marin · Financial Advisor</b>
+        <p class="disclaim">This self-assessment tool provides general educational information only and is not personalized financial, investment, tax, or legal advice. Results are based solely on your self-reported answers and do not predict or guarantee any outcome. We respect your privacy and never sell or share your information. © 2026 — sample demo built by Aperture Automations.</p>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ================= PAGE 2 : CHECKLIST ================= -->
+<div id="page-check" class="hidden">
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="brand"><b>Readiness Check</b><span>Sofia Marin · Financial Advisor</span></div>
+      <div class="nav-score">
+        <span>Readiness</span>
+        <div class="nav-bar"><i id="navFill"></i></div>
+        <span class="pct" id="navPct">0%</span>
+      </div>
+    </div>
+  </nav>
+
+  <header class="check-hero">
+    <div class="wrap">
+      <div class="eyebrow" style="color:#9FE0DE">Your retirement readiness check</div>
+      <h1 id="greeting">Let's see where you stand.</h1>
+      <p>Check off each item that's true for you today. Your readiness score updates as you go — there are no wrong answers, just an honest snapshot.</p>
+    </div>
+  </header>
+
+  <div class="check-body">
+    <div class="narrow" id="sections"><!-- sections injected by JS --></div>
+
+    <div class="narrow results-cta">
+      <button class="btn btn-gold" id="seeResults">See my results</button>
+      <div class="hint">Your answers stay on this page until you choose to share them.</div>
+    </div>
+
+    <div class="narrow result hidden" id="resultBlock">
+      <div class="result-card">
+        <div class="result-top" id="resultTop">
+          <div class="gauge">
+            <svg width="160" height="160" viewBox="0 0 160 160">
+              <circle class="track" cx="80" cy="80" r="68"></circle>
+              <circle class="fill" id="gaugeFill" cx="80" cy="80" r="68"></circle>
+            </svg>
+            <div class="num" id="gaugeNum">0%</div>
+          </div>
+          <h2 id="resultHeadline">—</h2>
+        </div>
+        <div class="result-body">
+          <p id="resultBody">—</p>
+          <p class="result-disclaim">This is a general self-assessment for educational purposes — not personalized financial advice, and not a prediction or guarantee. A conversation can help you put it in context.</p>
+        </div>
+        <div class="result-cta-deck">
+          <h3>Want to talk it through?</h3>
+          <p>Book a free, no-pressure call to turn your snapshot into clear next steps.</p>
+          <!-- DEPLOY: swap href for the client's real booking link -->
+          <a class="btn btn-gold" id="bookCall" href="https://calendly.com/secretlloyd/30min" target="_blank" rel="noopener" style="width:auto;min-width:260px;">Book my free call →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="foot">
+    <div class="wrap">
+      <div>
+        <b>Sofia Marin · Financial Advisor</b>
+        <p class="disclaim">This self-assessment tool provides general educational information only and is not personalized financial, investment, tax, or legal advice. Results are based solely on your self-reported answers and do not predict or guarantee any outcome. We respect your privacy and never sell or share your information. © 2026 — sample demo built by Aperture Automations.</p>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+/* ---------------- CHECKLIST DATA (general & educational — no advice) ---------------- */
+const SECTIONS = [
+  { t:"Your timeline & vision", items:[
+    "I have a target age or year in mind for retiring",
+    "I've pictured what a typical week might look like",
+    "I've thought about how many years I'd want it to last" ]},
+  { t:"Your spending picture", items:[
+    "I know roughly what my monthly expenses are today",
+    "I've considered which expenses might change in retirement",
+    "I've thought about healthcare as its own cost to plan for" ]},
+  { t:"Your income sources", items:[
+    "I can list the income sources I expect to draw from",
+    "I have a sense of roughly when each one would begin",
+    "I understand which sources are steady vs. variable" ]},
+  { t:"Your safety net", items:[
+    "I have a cushion set aside for unexpected costs",
+    "I've reviewed my insurance coverage in the last year or two",
+    "I have a rough plan for a large surprise expense" ]},
+  { t:"Your plan & clarity", items:[
+    "I've written down my main goals somewhere",
+    "I've reviewed my overall plan within the past year",
+    "I know who I'd call with a money question" ]},
+];
+const TOTAL = SECTIONS.reduce((n,s)=>n+s.items.length,0);
+
+/* ---------------- BUILD SECTIONS ---------------- */
+const elSections = document.getElementById('sections');
+SECTIONS.forEach((sec,si)=>{
+  const card = document.createElement('div');
+  card.className='csection';
+  let rows = sec.items.map((it,ii)=>`
+    <label class="check-row">
+      <input type="checkbox" data-score="1" aria-label="${it}">
+      <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span>
+      <span class="ctext">${it}</span>
+    </label>`).join('');
+  card.innerHTML = `<div class="chead"><span class="cnum">0${si+1}</span><h3>${sec.t}</h3></div>${rows}`;
+  elSections.appendChild(card);
+});
+
+/* ---------------- LIVE SCORING ---------------- */
+const boxes = [...document.querySelectorAll('#sections input[type=checkbox]')];
+const navFill = document.getElementById('navFill');
+const navPct  = document.getElementById('navPct');
+function currentPct(){ const c = boxes.filter(b=>b.checked).length; return Math.round((c/TOTAL)*100); }
+function updateLive(){
+  const pct = currentPct();
+  navFill.style.width = pct+'%';
+  navPct.textContent = pct+'%';
+}
+boxes.forEach(b=>b.addEventListener('change',updateLive));
+
+/* ---------------- OPT-IN FORM ---------------- */
+const form = document.getElementById('optinForm');
+function fail(id){ document.getElementById(id).classList.add('invalid'); }
+function clearFail(id){ document.getElementById(id).classList.remove('invalid'); }
+['name','email','phone'].forEach(k=>{
+  document.getElementById(k).addEventListener('input',()=>clearFail('f-'+k));
+});
+form.addEventListener('submit',(e)=>{
+  e.preventDefault();
+  const name=document.getElementById('name').value.trim();
+  const email=document.getElementById('email').value.trim();
+  const phone=document.getElementById('phone').value.trim();
+  let ok=true;
+  if(name.length<2){fail('f-name');ok=false;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){fail('f-email');ok=false;}
+  if(phone.replace(/\D/g,'').length<10){fail('f-phone');ok=false;}
+  if(!ok) return;
+
+  /* ===== DEPLOY NOTE =====================================================
+     In GoHighLevel: capture this lead by EITHER (a) using GHL's native form
+     element, OR (b) POSTing {name,email,phone} to a GHL Inbound Webhook
+     (same trigger style you built for Concierge Caller) so it lands in the
+     CRM and can fire the nurture sequence. The demo just advances below.
+     ===================================================================== */
+
+  document.getElementById('greeting').textContent =
+    (name.split(' ')[0] ? name.split(' ')[0]+", let's see where you stand." : "Let's see where you stand.");
+  document.getElementById('page-optin').classList.add('hidden');
+  document.getElementById('page-check').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'auto'});
+});
+
+/* ---------------- RESULTS ---------------- */
+const TIERS = {
+  green:{ cls:'r-green', head:"You've built a strong foundation",
+    body:"Your answers point to a lot of the key pieces already in place across timeline, spending, income, safety net, and planning. That's a real accomplishment. From here, a conversation is less about catching up and more about fine-tuning and confirming you're on the path you want." },
+  amber:{ cls:'r-amber', head:"You're well on your way",
+    body:"You've clearly thought about several important areas, and there are a few worth exploring a little further. That's a completely normal place to be — and an ideal moment to turn the pieces you have into one connected picture." },
+  red:{ cls:'r-red', head:"A great moment to get organized",
+    body:"Lots of people are right where you are — this stage is simply about getting the pieces in one place. There's no judgment here, and starting now is the most useful thing you can do. A calm, clarifying conversation tends to help most at exactly this point." },
+};
+function tierFor(pct){ if(pct>=73) return TIERS.green; if(pct>=40) return TIERS.amber; return TIERS.red; }
+
+const R=68, C=2*Math.PI*R;
+const gaugeFill=document.getElementById('gaugeFill');
+gaugeFill.style.strokeDasharray=C;
+gaugeFill.style.strokeDashoffset=C;
+
+document.getElementById('seeResults').addEventListener('click',()=>{
+  const pct=currentPct();
+  const tier=tierFor(pct);
+  const top=document.getElementById('resultTop');
+  top.className='result-top '+tier.cls;
+  document.getElementById('resultHeadline').textContent=tier.head;
+  document.getElementById('resultBody').textContent=tier.body;
+  const block=document.getElementById('resultBlock');
+  block.classList.remove('hidden');
+  block.scrollIntoView({behavior:'smooth',block:'start'});
+
+  /* animate gauge + count-up */
+  const reduce = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const numEl=document.getElementById('gaugeNum');
+  if(reduce){
+    gaugeFill.style.strokeDashoffset = C*(1-pct/100);
+    numEl.textContent=pct+'%';
+  } else {
+    setTimeout(()=>{ gaugeFill.style.strokeDashoffset = C*(1-pct/100); },120);
+    let cur=0; const step=Math.max(1,Math.round(pct/40));
+    const t=setInterval(()=>{ cur+=step; if(cur>=pct){cur=pct;clearInterval(t);} numEl.textContent=cur+'%'; },22);
+  }
+});
+</script>
+</body>
+</html>
