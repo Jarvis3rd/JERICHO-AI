@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Concierge Caller — Start your call</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Mulish:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<!-- Stripe.js (only needed when BILLING_ON = true) -->
+<script src="https://js.stripe.com/v3/"></script>
+<style>
+  :root{--bg:#0A0B0D;--panel:#141619;--panel2:#1B1E22;--teal:#54C7D0;--pink:#EC2A7B;
+        --ink:#F1F4F5;--muted:#8C969B;--line:rgba(255,255,255,.12)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:"Mulish",system-ui,sans-serif;
+       display:flex;justify-content:center;padding:32px 18px}
+  .card{width:100%;max-width:460px;background:linear-gradient(180deg,var(--panel2),var(--panel));
+        border:1px solid var(--line);border-radius:22px;padding:30px 28px}
+  .head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .head svg{width:40px;height:40px}
+  .head .name{font-family:"Fredoka";font-weight:600;font-size:1.2rem}
+  .head .name .pink{color:var(--pink)}
+  h1{font-family:"Fredoka";font-weight:500;font-size:1.35rem;margin:14px 0 4px;letter-spacing:-.2px}
+  .sub{color:var(--muted);font-size:.95rem;margin-bottom:24px}
+  label{display:block;font-family:"Fredoka";font-weight:500;font-size:.9rem;margin:18px 0 7px}
+  select,input[type=tel]{width:100%;padding:13px 14px;background:var(--bg);border:1px solid var(--line);
+        border-radius:11px;color:var(--ink);font-family:"Mulish";font-size:1rem}
+  select:focus,input:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal)}
+  #card-element{padding:14px;background:var(--bg);border:1px solid var(--line);border-radius:11px}
+  .consent{display:flex;gap:11px;align-items:flex-start;margin:22px 0 6px;font-size:.86rem;color:#C9D0D3;line-height:1.5}
+  .consent input{margin-top:3px;width:18px;height:18px;accent-color:var(--pink);flex:0 0 auto}
+  button{width:100%;margin-top:22px;padding:16px;border:none;border-radius:12px;cursor:pointer;
+         font-family:"Fredoka";font-weight:600;font-size:1.05rem;color:#fff;background:var(--pink)}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .promise{text-align:center;color:var(--muted);font-size:.85rem;margin-top:14px}
+  .promise strong{color:var(--teal)}
+  #msg{margin-top:16px;font-size:.92rem;min-height:20px}
+  #msg.err{color:#ff7a9c}#msg.ok{color:var(--teal)}
+  .done{text-align:center;padding:18px 0}
+  .done h2{font-family:"Fredoka";font-weight:600;font-size:1.4rem;margin-bottom:8px}
+  .done p{color:var(--muted)}
+  .hide{display:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="head">
+    <svg viewBox="0 0 100 104" fill="none" stroke="#54C7D0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="50" y1="6" x2="50" y2="18"/><circle cx="50" cy="6" r="4" fill="#54C7D0"/>
+      <path d="M28 22 h44 a6 6 0 0 1 6 6 v18 a28 28 0 0 1 -56 0 v-18 a6 6 0 0 1 6 -6 z" fill="#0E1316"/>
+      <path d="M38 40 a5 5 0 0 1 9 0 a5 5 0 0 1 9 0 q0 6 -9 11 q-9 -5 -9 -11 z" fill="#EC2A7B" transform="translate(-9,2)"/>
+      <path d="M38 40 a5 5 0 0 1 9 0 a5 5 0 0 1 9 0 q0 6 -9 11 q-9 -5 -9 -11 z" fill="#EC2A7B" transform="translate(13,2)"/>
+      <path d="M50 72 L40 66 L40 78 Z M50 72 L60 66 L60 78 Z" fill="#EC2A7B"/>
+      <circle cx="50" cy="72" r="2.9" fill="#EC2A7B"/>
+    </svg>
+    <span class="name">Concierge <span class="pink">Caller</span></span>
+  </div>
+
+  <div id="form-view">
+    <h1>Let's get you off hold.</h1>
+    <p class="sub">Tell us who to call and where to reach you. We'll do the waiting.</p>
+
+    <label for="company">Who should we call?</label>
+    <select id="company"></select>
+
+    <label for="callback">Your callback number</label>
+    <input id="callback" type="tel" placeholder="(555) 123-4567" autocomplete="tel" />
+
+    <div id="card-row" class="hide">
+      <label for="card-element">Card — only charged if we connect you</label>
+      <div id="card-element"></div>
+    </div>
+
+    <label class="consent">
+      <input type="checkbox" id="consent" />
+      <span>I authorize Concierge Caller (a service of Aperture Automations LLC) to call the
+      company I selected on my behalf, record that call to detect when a live agent answers,
+      call me back to connect me, and send me recurring SMS service updates about this call
+      (message frequency varies; msg &amp; data rates may apply; reply STOP to opt out, HELP for
+      help). I'm only charged if I'm connected to a live agent.</span>
+    </label>
+
+    <button id="submit" disabled>Start my call</button>
+    <p class="promise"><strong>No human, no charge.</strong> Calls may be recorded.</p>
+    <p style="text-align:center;color:#6b7378;font-size:.74rem;line-height:1.5;margin-top:10px">
+      By starting your call you agree to receive service-related text messages from Concierge
+      Caller. Message frequency varies; msg &amp; data rates may apply. Reply STOP to opt out,
+      HELP for help. See our
+      <a href="privacy.html" style="color:#8C969B;text-decoration:underline">Privacy Policy</a>
+      and <a href="terms.html" style="color:#8C969B;text-decoration:underline">Terms</a>.
+    </p>
+    <div id="msg"></div>
+  </div>
+
+  <div id="done-view" class="done hide">
+    <h2>We're on hold for you 💗</h2>
+    <p>Hang tight — we'll ring you the second a real person picks up. You can put your phone down.</p>
+  </div>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────────────────────────────────
+   CONFIGURE THESE FOUR LINES
+   ───────────────────────────────────────────────────────────────────────── */
+const API_BASE   = "https://concierge.apertureautomations.ai"; // your backend
+const BILLING_ON = false;            // set true after Stripe is wired
+const STRIPE_PK  = "pk_test_xxx";    // Stripe publishable key (safe in the browser)
+const API_KEY    = "";               // leave BLANK in the browser — see GHL-SETUP.md
+/* ───────────────────────────────────────────────────────────────────────── */
+
+// GHL "Inbound Webhook" trigger for the call-start "we're on it" SMS (Workflow A).
+const GHL_CALL_START_WEBHOOK = "https://services.leadconnectorhq.com/hooks/pRqi2BjUB7oRnI9Mse2x/webhook-trigger/8700ce24-3ad3-43ce-8bb6-7c07358af2f8";
+
+const $ = (id) => document.getElementById(id);
+let stripe, cardEl;
+
+// Workflow A — fire-and-forget ping to GHL so the "we're on it" SMS goes out the
+// moment a call starts. Runs independently of the backend: the text still sends
+// even if /sessions is unreachable (text/plain avoids a CORS preflight).
+function pingCallStart(companyKey, companyLabel, customerNumber){
+  try{
+    // Send as form-urlencoded: it's a CORS-"simple" request (no preflight, always
+    // sends) AND GHL parses the fields, so they appear under "Fetch sample requests".
+    // (Plain text reached GHL but wasn't parsed into mappable fields — hence no sample.)
+    const body = new URLSearchParams({
+      source: "Concierge Caller - Call Start",
+      stage: "call_started",
+      company_key: companyKey || "",
+      company: companyLabel || "",
+      customer_number: customerNumber || "",
+      consent: "true",
+      page_url: location.href
+    }).toString();
+    fetch(GHL_CALL_START_WEBHOOK, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+      body,
+      keepalive: true
+    }).catch(()=>{});
+  }catch(e){ /* never block the call flow */ }
+}
+
+// Populate the company dropdown from the backend allowlist (with a safe fallback).
+async function loadTargets(){
+  const sel = $("company");
+  const placeholder = `<option value="" disabled selected>Select a company…</option>`;
+  try{
+    const r = await fetch(`${API_BASE}/targets`);
+    const { targets } = await r.json();
+    sel.innerHTML = placeholder + targets.map(t => `<option value="${t.key}">${t.label}</option>`).join("");
+  }catch(e){
+    // Backend unreachable — fall back to a mirror of targets.py so the page still
+    // offers real, dialable lines. KEEP THIS LIST MATCHED TO targets.py (keys + labels).
+    sel.innerHTML = placeholder +
+      `<option value="pge">PG&amp;E</option>` +
+      `<option value="att">AT&amp;T</option>` +
+      `<option value="comcast">Comcast / Xfinity</option>`;
+  }
+}
+
+function toE164(v){
+  const d = (v||"").replace(/\D/g,"");
+  if(d.length === 10) return "+1"+d;
+  if(d.length === 11 && d[0]==="1") return "+"+d;
+  return v.trim().startsWith("+") ? v.trim() : "+"+d;
+}
+
+function refreshButton(){ $("submit").disabled = !$("consent").checked; }
+
+async function init(){
+  await loadTargets();
+  $("consent").addEventListener("change", refreshButton);
+  if(BILLING_ON){
+    $("card-row").classList.remove("hide");
+    stripe = Stripe(STRIPE_PK);
+    cardEl = stripe.elements().create("card", {style:{base:{color:"#F1F4F5",fontFamily:"Mulish, sans-serif",
+             "::placeholder":{color:"#8C969B"}}}});
+    cardEl.mount("#card-element");
+  }
+  $("submit").addEventListener("click", submit);
+}
+
+async function submit(){
+  const msg = $("msg"); msg.className=""; msg.textContent="";
+  if(!$("company").value){ msg.className="err"; msg.textContent="Please choose who we should call."; return; }
+  const callback = toE164($("callback").value);
+  if(callback.length < 12){ msg.className="err"; msg.textContent="Please enter a valid phone number."; return; }
+
+  $("submit").disabled = true; msg.className="ok"; msg.textContent="Setting up your call…";
+
+  // Workflow A: ping GHL first so the "we're on it" SMS goes out even if the
+  // backend isn't reachable yet (capture the friendly company name for the text).
+  const companyLabel = $("company").options[$("company").selectedIndex].text;
+  pingCallStart($("company").value, companyLabel, callback);
+
+  const payload = {
+    target_key: $("company").value,
+    customer_number: callback,
+    consent: true,
+  };
+
+  try{
+    if(BILLING_ON){
+      const { paymentMethod, error } = await stripe.createPaymentMethod({type:"card", card:cardEl});
+      if(error){ throw new Error(error.message); }
+      payload.payment_method_id = paymentMethod.id;
+    }
+    const headers = {"Content-Type":"application/json"};
+    if(API_KEY) headers["X-Api-Key"] = API_KEY;     // prod: send this server-side instead
+    const r = await fetch(`${API_BASE}/sessions`, {method:"POST", headers, body:JSON.stringify(payload)});
+    if(!r.ok){ const j = await r.json().catch(()=>({})); throw new Error(j.detail || ("Error "+r.status)); }
+    $("form-view").classList.add("hide");
+    $("done-view").classList.remove("hide");
+  }catch(e){
+    msg.className="err"; msg.textContent = e.message || "Something went wrong. Please try again.";
+    $("submit").disabled = false;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
