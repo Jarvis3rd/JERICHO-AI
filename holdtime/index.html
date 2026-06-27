@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>How many hours a year do you lose on hold? — Concierge Caller</title>
+<meta name="description" content="Find out in 30 seconds how many hours — and dollars — you lose on hold every year. Most people are shocked." />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Mulish:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0A0B0D; --panel:#141619; --panel2:#1B1E22;
+    --teal:#54C7D0; --pink:#EC2A7B; --ink:#F1F4F5; --muted:#8C969B;
+    --line:rgba(255,255,255,.12); --good:#54C7D0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{background:var(--bg);color:var(--ink);font-family:"Mulish",system-ui,sans-serif;
+       min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:30px 18px}
+  .card{width:100%;max-width:480px;background:linear-gradient(180deg,var(--panel2),var(--panel));
+        border:1px solid var(--line);border-radius:24px;padding:30px 26px 28px;
+        box-shadow:0 30px 80px -40px rgba(0,0,0,.9)}
+
+  .head{display:flex;align-items:center;gap:11px;margin-bottom:22px}
+  .head svg{width:38px;height:38px;flex:0 0 auto}
+  .head .name{font-family:"Fredoka";font-weight:600;font-size:1.12rem;letter-spacing:.2px}
+  .head .name .pink{color:var(--pink)}
+
+  .eyebrow{font-family:"Fredoka";font-weight:500;font-size:.72rem;letter-spacing:.16em;
+           text-transform:uppercase;color:var(--teal);margin-bottom:10px}
+  h1{font-family:"Fredoka";font-weight:600;font-size:1.62rem;line-height:1.15;letter-spacing:-.4px;margin-bottom:8px}
+  .sub{color:var(--muted);font-size:.98rem;line-height:1.5;margin-bottom:26px}
+
+  .field{margin-bottom:24px}
+  .field > .q{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+              font-family:"Fredoka";font-weight:500;font-size:.96rem;margin-bottom:12px}
+  .field .val{font-family:"Fredoka";font-weight:600;color:var(--teal);font-size:1.02rem;white-space:nowrap}
+
+  /* range slider */
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:6px;
+        background:linear-gradient(90deg,var(--teal) 0%,var(--teal) var(--fill,20%),#2a2f34 var(--fill,20%),#2a2f34 100%);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;
+        background:var(--ink);border:3px solid var(--teal);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+  input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--ink);
+        border:3px solid var(--teal);cursor:pointer}
+  input[type=range]:focus-visible{box-shadow:0 0 0 3px rgba(84,199,208,.35)}
+
+  /* chip group */
+  .chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .chip{padding:12px 6px;border:1px solid var(--line);border-radius:12px;background:var(--bg);
+        color:var(--ink);font-family:"Fredoka";font-weight:500;font-size:.95rem;cursor:pointer;
+        text-align:center;transition:border-color .15s,background .15s,color .15s}
+  .chip small{display:block;font-family:"Mulish";font-weight:600;color:var(--muted);font-size:.66rem;margin-top:2px}
+  .chip:hover{border-color:rgba(84,199,208,.5)}
+  .chip[aria-pressed="true"]{background:rgba(84,199,208,.12);border-color:var(--teal);color:var(--teal)}
+  .chip[aria-pressed="true"] small{color:var(--teal)}
+  .chip:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+
+  .running{display:flex;align-items:center;justify-content:center;gap:8px;margin:6px 0 20px;
+           color:var(--muted);font-size:.86rem}
+  .running b{color:var(--ink);font-family:"Fredoka";font-weight:600}
+
+  button.cta{width:100%;padding:16px;border:none;border-radius:13px;cursor:pointer;
+         font-family:"Fredoka";font-weight:600;font-size:1.06rem;color:#fff;background:var(--pink);
+         transition:transform .08s,filter .15s}
+  button.cta:hover{filter:brightness(1.07)}
+  button.cta:active{transform:translateY(1px)}
+  button.cta:disabled{opacity:.45;cursor:not-allowed}
+  button.cta:focus-visible{outline:3px solid rgba(236,42,123,.45);outline-offset:2px}
+
+  /* ── reveal ── */
+  .reveal{text-align:center}
+  .dialwrap{position:relative;width:206px;height:206px;margin:6px auto 18px}
+  .dialwrap svg{transform:rotate(-90deg)}
+  .dial-track{stroke:#23282d;stroke-width:12;fill:none}
+  .dial-fill{stroke:var(--pink);stroke-width:12;fill:none;stroke-linecap:round;
+             transition:stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1)}
+  .dial-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .dial-center .big{font-family:"Fredoka";font-weight:700;font-size:3.1rem;line-height:1;color:var(--ink)}
+  .dial-center .unit{font-family:"Fredoka";font-weight:500;color:var(--muted);font-size:.82rem;letter-spacing:.12em;text-transform:uppercase;margin-top:4px}
+  .reveal h2{font-family:"Fredoka";font-weight:600;font-size:1.34rem;line-height:1.22;margin:4px 0 6px}
+  .reveal h2 .tax{color:var(--pink)}
+  .reveal .money{color:var(--teal);font-weight:700}
+  .reveal .line{color:var(--muted);font-size:.96rem;line-height:1.5;margin-bottom:22px}
+  .pitch{background:rgba(84,199,208,.07);border:1px solid rgba(84,199,208,.22);border-radius:14px;
+         padding:15px 16px;margin-bottom:22px;font-size:.95rem;line-height:1.5}
+  .pitch b{font-family:"Fredoka";font-weight:600;color:var(--ink)}
+
+  label.lead{display:block;font-family:"Fredoka";font-weight:500;font-size:.86rem;margin:14px 0 7px;text-align:left}
+  input[type=text],input[type=email],input[type=tel]{width:100%;padding:13px 14px;background:var(--bg);
+        border:1px solid var(--line);border-radius:11px;color:var(--ink);font-family:"Mulish";font-size:1rem}
+  input:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal)}
+  #msg{margin-top:14px;font-size:.9rem;min-height:18px}
+  #msg.err{color:#ff7a9c}#msg.ok{color:var(--teal)}
+  .back{display:inline-block;margin-top:16px;background:none;border:none;color:var(--muted);
+        font-family:"Mulish";font-size:.84rem;cursor:pointer;text-decoration:underline;padding:6px}
+  .back:hover{color:var(--ink)}
+
+  .done{text-align:center;padding:10px 0}
+  .done .tick{width:62px;height:62px;margin:0 auto 14px;border-radius:50%;background:rgba(84,199,208,.12);
+        border:1px solid rgba(84,199,208,.35);display:flex;align-items:center;justify-content:center}
+  .done h2{font-family:"Fredoka";font-weight:600;font-size:1.4rem;margin-bottom:8px}
+  .done p{color:var(--muted);line-height:1.55;margin-bottom:20px}
+
+  .foot{text-align:center;color:#5d666b;font-size:.72rem;line-height:1.5;margin-top:20px}
+  .foot a{color:var(--muted);text-decoration:underline}
+  .hide{display:none}
+
+  @media (max-width:380px){
+    h1{font-size:1.42rem}
+    .dialwrap{width:182px;height:182px}
+    .dial-center .big{font-size:2.7rem}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .dial-fill{transition:none}
+    button.cta{transition:none}
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="head">
+    <svg viewBox="0 0 100 104" fill="none" stroke="#54C7D0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <line x1="50" y1="6" x2="50" y2="18"/><circle cx="50" cy="6" r="4" fill="#54C7D0"/>
+      <path d="M28 22 h44 a6 6 0 0 1 6 6 v18 a28 28 0 0 1 -56 0 v-18 a6 6 0 0 1 6 -6 z" fill="#0E1316"/>
+      <path d="M38 40 a5 5 0 0 1 9 0 a5 5 0 0 1 9 0 q0 6 -9 11 q-9 -5 -9 -11 z" fill="#EC2A7B" transform="translate(-9,2)"/>
+      <path d="M38 40 a5 5 0 0 1 9 0 a5 5 0 0 1 9 0 q0 6 -9 11 q-9 -5 -9 -11 z" fill="#EC2A7B" transform="translate(13,2)"/>
+      <path d="M50 72 L40 66 L40 78 Z M50 72 L60 66 L60 78 Z" fill="#EC2A7B"/>
+      <circle cx="50" cy="72" r="2.9" fill="#EC2A7B"/>
+    </svg>
+    <span class="name">Concierge <span class="pink">Caller</span></span>
+  </div>
+
+  <!-- ───────── CALCULATOR ───────── -->
+  <div id="calc-view">
+    <div class="eyebrow">The hold-time check · 30 seconds</div>
+    <h1>How many hours a year do you lose on hold?</h1>
+    <p class="sub">Answer three quick things. Most people are genuinely shocked by their number.</p>
+
+    <div class="field">
+      <div class="q"><span>Calls a month that put you on hold</span><span class="val" id="callsVal">4</span></div>
+      <input type="range" id="calls" min="1" max="20" value="4" step="1" aria-label="Calls per month that put you on hold" />
+    </div>
+
+    <div class="field">
+      <div class="q"><span>Typical time stuck on hold</span><span class="val" id="holdVal">20 min</span></div>
+      <div class="chips" id="holdChips" role="group" aria-label="Typical hold time">
+        <button type="button" class="chip" data-v="10">10<small>min</small></button>
+        <button type="button" class="chip" data-v="20" aria-pressed="true">20<small>min</small></button>
+        <button type="button" class="chip" data-v="30">30<small>min</small></button>
+        <button type="button" class="chip" data-v="45">45+<small>min</small></button>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="q"><span>What's an hour of your time worth?</span><span class="val" id="rateVal">$25</span></div>
+      <div class="chips" id="rateChips" role="group" aria-label="Value of your time per hour">
+        <button type="button" class="chip" data-v="15">$15</button>
+        <button type="button" class="chip" data-v="25" aria-pressed="true">$25</button>
+        <button type="button" class="chip" data-v="40">$40</button>
+        <button type="button" class="chip" data-v="60">$60</button>
+      </div>
+    </div>
+
+    <div class="running">So far that's <b id="preview">16 hours</b>&nbsp;a year on hold.</div>
+
+    <button class="cta" id="calcBtn">Show me my Hold Time Tax</button>
+  </div>
+
+  <!-- ───────── REVEAL ───────── -->
+  <div id="reveal-view" class="reveal hide">
+    <div class="eyebrow">Your number</div>
+    <div class="dialwrap">
+      <svg width="206" height="206" viewBox="0 0 206 206" aria-hidden="true">
+        <circle class="dial-track" cx="103" cy="103" r="90"/>
+        <circle class="dial-fill" id="dialFill" cx="103" cy="103" r="90"/>
+      </svg>
+      <div class="dial-center">
+        <span class="big" id="hoursBig">0</span>
+        <span class="unit">hours / year</span>
+      </div>
+    </div>
+
+    <h2>That's your <span class="tax">Hold Time Tax</span> —<br><span class="money" id="taxBig">$0</span> of your life, every year.</h2>
+    <p class="line" id="revealLine">Gone. Sitting on hold, listening to the same four bars of music.</p>
+
+    <div class="pitch"><b>Here's the thing:</b> you never have to be on that call. Concierge Caller waits on hold for you and rings you back the second a real person picks up. Stop paying the tax.</div>
+
+    <label class="lead" for="lname">Want us to take these calls off your plate?</label>
+    <input id="lname" type="text" placeholder="First name" autocomplete="given-name" />
+    <input id="lemail" type="email" placeholder="Email" autocomplete="email" style="margin-top:9px" />
+    <input id="lphone" type="tel" placeholder="Phone (so we can ring you back)" autocomplete="tel" style="margin-top:9px" />
+
+    <button class="cta" id="optinBtn" style="margin-top:18px">Get my hours back</button>
+    <div id="msg"></div>
+    <button class="back" id="backBtn">← recalculate</button>
+  </div>
+
+  <!-- ───────── DONE ───────── -->
+  <div id="done-view" class="done hide">
+    <div class="tick">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#54C7D0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 L9 17 L4 12"/></svg>
+    </div>
+    <h2>You're in. 💗</h2>
+    <p>Your hold-time days are numbered. Check your inbox — we'll show you exactly how Concierge Caller takes these calls off your plate.</p>
+    <a class="cta" id="seeMore" href="#" style="display:block;text-decoration:none;line-height:1.2;padding:15px">See how it works →</a>
+  </div>
+
+  <p class="foot" id="footNote">
+    A quick, friendly estimate — not a bill. We just multiply your calls × hold time across a year.
+  </p>
+</div>
+
+<script>
+/* ───────────────────────────────────────────────────────────────────────────
+   PLUG IN GHL WHEN READY (optional — the calculator works fully without it).
+   Paste your GHL Inbound Webhook URL here to start capturing leads:
+   ─────────────────────────────────────────────────────────────────────────── */
+const GHL_WEBHOOK    = "";   // e.g. "https://services.leadconnectorhq.com/hooks/.../webhook-trigger/..."
+const CONCIERGE_URL  = "https://apertureautomations.ai/retire/concierge"; // where "See how it works" points
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+const $ = (id) => document.getElementById(id);
+
+const state = { calls: 4, hold: 20, rate: 25 };
+const RESULT = {};   // filled on calculate, sent to GHL on opt-in
+
+/* ----- inputs ----- */
+function fmtHours(h){ return h === 1 ? "1 hour" : `${h} hours`; }
+function hoursPerYear(){ return Math.round((state.calls * state.hold * 12) / 60); }
+function taxDollars(){ return Math.round(hoursPerYear() * state.rate); }
+
+function refreshPreview(){
+  // slider fill
+  const pct = ((state.calls - 1) / (20 - 1)) * 100;
+  $("calls").style.setProperty("--fill", pct + "%");
+  $("callsVal").textContent = state.calls;
+  $("holdVal").textContent = (state.hold === 45 ? "45+" : state.hold) + " min";
+  $("rateVal").textContent = "$" + state.rate;
+  $("preview").textContent = fmtHours(hoursPerYear());
+}
+
+$("calls").addEventListener("input", (e) => { state.calls = +e.target.value; refreshPreview(); });
+
+function wireChips(groupId, key){
+  const group = $(groupId);
+  group.addEventListener("click", (e) => {
+    const chip = e.target.closest(".chip");
+    if(!chip) return;
+    group.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed","false"));
+    chip.setAttribute("aria-pressed","true");
+    state[key] = +chip.dataset.v;
+    refreshPreview();
+  });
+}
+wireChips("holdChips","hold");
+wireChips("rateChips","rate");
+
+/* ----- reveal with count-up + dial ----- */
+function animateReveal(){
+  const hours = hoursPerYear();
+  const tax   = taxDollars();
+  RESULT.hours = hours; RESULT.tax = tax;
+  RESULT.calls = state.calls; RESULT.hold = state.hold; RESULT.rate = state.rate;
+
+  // tailor the closing line to severity
+  let line = "Gone. Sitting on hold, listening to the same four bars of music.";
+  if(hours >= 40) line = "That's a full work-week of your year — spent listening to hold music.";
+  else if(hours >= 20) line = "That's most of a work-week, gone to hold music and \u201Cyour call is important to us.\u201D";
+  $("revealLine").textContent = line;
+
+  $("calc-view").classList.add("hide");
+  $("reveal-view").classList.remove("hide");
+  $("taxBig").textContent = "$" + tax.toLocaleString();
+
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const dial = $("dialFill");
+  const C = 2 * Math.PI * 90;                 // circumference
+  dial.style.strokeDasharray = C;
+  // fill proportionally, capping the ring at 50 hrs so big numbers still look "maxed"
+  const ratio = Math.min(hours / 50, 1);
+  dial.style.strokeDashoffset = C;            // start empty
+
+  if(reduce){
+    $("hoursBig").textContent = hours;
+    dial.style.transition = "none";
+    dial.style.strokeDashoffset = C * (1 - ratio);
+    return;
+  }
+  // count the number up
+  const dur = 1100, t0 = performance.now();
+  function tick(now){
+    const p = Math.min((now - t0) / dur, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    $("hoursBig").textContent = Math.round(hours * eased);
+    if(p < 1) requestAnimationFrame(tick);
+    else $("hoursBig").textContent = hours;
+  }
+  requestAnimationFrame(tick);
+  // fill the dial (next frame so the transition runs)
+  requestAnimationFrame(() => { dial.style.strokeDashoffset = C * (1 - ratio); });
+}
+
+$("calcBtn").addEventListener("click", animateReveal);
+$("backBtn").addEventListener("click", () => {
+  $("reveal-view").classList.add("hide");
+  $("calc-view").classList.remove("hide");
+});
+
+/* ----- lead capture (form-urlencoded: GHL parses it; a "simple" request, so it
+         always sends and never trips CORS. No-ops cleanly if GHL_WEBHOOK is blank) ----- */
+function sendToGHL(lead){
+  if(!GHL_WEBHOOK) return;
+  try{
+    fetch(GHL_WEBHOOK, {
+      method:"POST",
+      headers:{ "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8" },
+      body:new URLSearchParams(lead).toString(),
+      keepalive:true
+    }).catch(()=>{});
+  }catch(e){ /* never block the funnel */ }
+}
+
+function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+$("optinBtn").addEventListener("click", () => {
+  const msg = $("msg"); msg.className=""; msg.textContent="";
+  const name = $("lname").value.trim();
+  const email = $("lemail").value.trim();
+  const phone = $("lphone").value.trim();
+  if(!name){ msg.className="err"; msg.textContent="Your first name, please."; return; }
+  if(!validEmail(email)){ msg.className="err"; msg.textContent="That email doesn't look right."; return; }
+
+  sendToGHL({
+    source: "Hold Time Tax Calculator",
+    first_name: name,
+    email: email,
+    phone: phone,
+    hours_per_year: String(RESULT.hours),
+    hold_time_tax_usd: String(RESULT.tax),
+    calls_per_month: String(RESULT.calls),
+    avg_hold_minutes: String(RESULT.hold),
+    hourly_value_usd: String(RESULT.rate),
+    page_url: location.href
+  });
+
+  $("reveal-view").classList.add("hide");
+  $("footNote").classList.add("hide");
+  $("done-view").classList.remove("hide");
+});
+
+/* ----- done CTA ----- */
+$("seeMore").setAttribute("href", CONCIERGE_URL);
+
+refreshPreview();
+</script>
+</body>
+</html>
