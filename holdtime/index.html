@@ -86,7 +86,7 @@
   .pitch b{font-family:"Fredoka";font-weight:600;color:var(--ink)}
 
   label.lead{display:block;font-family:"Fredoka";font-weight:500;font-size:.86rem;margin:14px 0 7px;text-align:left}
-  input[type=text],input[type=email],input[type=tel]{width:100%;padding:13px 14px;background:var(--bg);
+  .optin-head{font-family:"Fredoka";font-weight:500;font-size:.96rem;margin:6px 0 4px;text-align:left;line-height:1.4}  input[type=text],input[type=email],input[type=tel]{width:100%;padding:13px 14px;background:var(--bg);
         border:1px solid var(--line);border-radius:11px;color:var(--ink);font-family:"Mulish";font-size:1rem}
   input:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal)}
   #msg{margin-top:14px;font-size:.9rem;min-height:18px}
@@ -185,13 +185,15 @@
 
     <div class="pitch"><b>Here's the thing:</b> you never have to be on that call. Concierge Caller waits on hold for you and rings you back the second a real person picks up. Stop paying the tax.</div>
 
-    <label class="lead" for="lname">Want us to take these calls off your plate?</label>
-    <input id="lname" type="text" placeholder="First name" autocomplete="given-name" />
-    <input id="lemail" type="email" placeholder="Email" autocomplete="email" style="margin-top:9px" />
-    <input id="lphone" type="tel" placeholder="Phone (so we can ring you back)" autocomplete="tel" style="margin-top:9px" />
+    <div class="optin-head">Want us to take these calls off your plate? Drop your details below 👇</div>
+    <iframe
+      src="https://api.leadconnectorhq.com/widget/form/Tu6ENoF5C6GFLtXHQB53"
+      style="width:100%;min-height:470px;border:none;border-radius:12px;background:#fff;margin-top:6px"
+      id="inline-Tu6ENoF5C6GFLtXHQB53"
+      data-layout="{'id':'INLINE'}"
+      data-form-id="Tu6ENoF5C6GFLtXHQB53"
+      title="Hold Time Tax – Opt-in"></iframe>
 
-    <button class="cta" id="optinBtn" style="margin-top:18px">Get my hours back</button>
-    <div id="msg"></div>
     <button class="back" id="backBtn">← recalculate</button>
   </div>
 
@@ -212,10 +214,9 @@
 
 <script>
 /* ───────────────────────────────────────────────────────────────────────────
-   PLUG IN GHL WHEN READY (optional — the calculator works fully without it).
-   Paste your GHL Inbound Webhook URL here to start capturing leads:
+   Lead capture is handled by the embedded GHL form (native — no webhook).
+   Leads land directly in your GHL Contacts on submit.
    ─────────────────────────────────────────────────────────────────────────── */
-const GHL_WEBHOOK    = "https://services.leadconnectorhq.com/hooks/pRqi2BjUB7oRnI9Mse2x/webhook-trigger/d2e5cadf-4d58-4cde-ae62-3f223fe1f1f8";
 const CONCIERGE_URL  = "https://apertureautomations.ai/retire/concierge"; // where "See how it works" points
 /* ─────────────────────────────────────────────────────────────────────────── */
 
@@ -306,52 +307,15 @@ $("backBtn").addEventListener("click", () => {
   $("calc-view").classList.remove("hide");
 });
 
-/* ----- lead capture (form-urlencoded: GHL parses it; a "simple" request, so it
-         always sends and never trips CORS. No-ops cleanly if GHL_WEBHOOK is blank) ----- */
-function sendToGHL(lead){
-  if(!GHL_WEBHOOK) return;
-  try{
-    fetch(GHL_WEBHOOK, {
-      method:"POST",
-      headers:{ "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8" },
-      body:new URLSearchParams(lead).toString(),
-      keepalive:true
-    }).catch(()=>{});
-  }catch(e){ /* never block the funnel */ }
-}
-
-function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
-
-$("optinBtn").addEventListener("click", () => {
-  const msg = $("msg"); msg.className=""; msg.textContent="";
-  const name = $("lname").value.trim();
-  const email = $("lemail").value.trim();
-  const phone = $("lphone").value.trim();
-  if(!name){ msg.className="err"; msg.textContent="Your first name, please."; return; }
-  if(!validEmail(email)){ msg.className="err"; msg.textContent="That email doesn't look right."; return; }
-
-  sendToGHL({
-    source: "Hold Time Tax Calculator",
-    first_name: name,
-    email: email,
-    phone: phone,
-    hours_per_year: String(RESULT.hours),
-    hold_time_tax_usd: String(RESULT.tax),
-    calls_per_month: String(RESULT.calls),
-    avg_hold_minutes: String(RESULT.hold),
-    hourly_value_usd: String(RESULT.rate),
-    page_url: location.href
-  });
-
-  $("reveal-view").classList.add("hide");
-  $("footNote").classList.add("hide");
-  $("done-view").classList.remove("hide");
-});
+/* Lead capture is handled by the embedded GHL form above — leads land directly
+   in GHL Contacts on submit. No webhook, no custom POST. */
 
 /* ----- done CTA ----- */
 $("seeMore").setAttribute("href", CONCIERGE_URL);
 
 refreshPreview();
 </script>
+<!-- GHL form auto-resize / submit handling (native capture into Contacts) -->
+<script src="https://link.msgsndr.com/js/form_embed.js"></script>
 </body>
 </html>
