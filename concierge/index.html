@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Concierge Caller — An AI That Waits on Hold For You | Aperture Automations</title>
+<meta name="description" content="Concierge Caller is an AI assistant that calls companies, waits on hold for you, and rings you back the moment a real person picks up. Never waste your life on hold again." />
+<link rel="canonical" href="https://apertureautomations.ai/concierge" />
+
+<!-- Open Graph / social preview -->
+<meta property="og:title" content="Concierge Caller — An AI That Waits on Hold For You" />
+<meta property="og:description" content="Stop wasting your life on hold. Concierge Caller waits on the line and calls you back the second a real human answers." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://apertureautomations.ai/concierge" />
+
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Mulish:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<!-- Entity clarity for Google + AI answer engines -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "Concierge Caller",
+  "serviceType": "AI hold-waiting and call-back service",
+  "provider": {
+    "@type": "Organization",
+    "name": "Aperture Automations",
+    "url": "https://apertureautomations.ai"
+  },
+  "areaServed": "US",
+  "url": "https://apertureautomations.ai/concierge",
+  "description": "Concierge Caller is an AI assistant that calls companies, waits on hold, and calls you back the moment a real person answers, so you never have to sit on hold again."
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"Is there really a service that waits on hold for me?","acceptedAnswer":{"@type":"Answer","text":"Yes. Concierge Caller calls the company for you, waits through the hold music and phone menus, and rings you back the moment a real person picks up."}},
+    {"@type":"Question","name":"How does Concierge Caller work?","acceptedAnswer":{"@type":"Answer","text":"You tell it who to call and what you need. It dials in, navigates the phone menus, and holds the line. When a live human answers, your phone rings and you are connected instantly."}},
+    {"@type":"Question","name":"Do I have to stay by my phone while it waits?","acceptedAnswer":{"@type":"Answer","text":"No. Go live your life. Concierge Caller does the waiting and only rings you when there is a real person on the line."}},
+    {"@type":"Question","name":"What if a human is never reached?","acceptedAnswer":{"@type":"Answer","text":"If we never reach a real person for you, you are not charged. No human, no charge."}},
+    {"@type":"Question","name":"How much does Concierge Caller cost?","acceptedAnswer":{"@type":"Answer","text":"Your first call is free. After that it is $15 per successful call, and you are only charged when we connect you to a real person. No human, no charge. Prepaid call bundles are coming soon."}}
+  ]
+}
+</script>
+
+<style>
+  :root{
+    --bg:#0A0B0D; --panel:#141619; --panel2:#1B1E22;
+    --teal:#54C7D0; --pink:#EC2A7B; --ink:#F1F4F5; --muted:#8C969B;
+    --line:rgba(255,255,255,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{background:var(--bg);color:var(--ink);font-family:"Mulish",system-ui,sans-serif;line-height:1.6}
+  .wrap{max-width:960px;margin:0 auto;padding:0 22px}
+  a{color:inherit}
+
+  /* header */
+  header{position:sticky;top:0;z-index:10;background:rgba(10,11,13,.82);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand svg{width:34px;height:34px}
+  .brand b{font-family:"Fredoka";font-weight:600;font-size:1.08rem}
+  .brand b .pink{color:var(--pink)}
+  .nav .btn{font-size:.92rem;padding:9px 16px}
+
+  .btn{display:inline-block;font-family:"Fredoka";font-weight:600;text-decoration:none;border-radius:11px;cursor:pointer;transition:filter .15s,transform .08s;border:none}
+  .btn-primary{background:var(--pink);color:#fff;padding:14px 22px;font-size:1rem}
+  .btn-primary:hover{filter:brightness(1.08)}
+  .btn-primary:active{transform:translateY(1px)}
+  .btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line);padding:13px 22px;font-size:1rem}
+  .btn-ghost:hover{border-color:var(--teal);color:var(--teal)}
+
+  /* hero */
+  .hero{text-align:center;padding:70px 0 56px}
+  .eyebrow{font-family:"Fredoka";font-weight:500;letter-spacing:.16em;text-transform:uppercase;font-size:.74rem;color:var(--teal);margin-bottom:16px}
+  h1{font-family:"Fredoka";font-weight:600;font-size:clamp(2.1rem,6vw,3.4rem);line-height:1.08;letter-spacing:-1px;margin-bottom:18px}
+  h1 .pink{color:var(--pink)}
+  .lede{font-size:clamp(1.05rem,2.5vw,1.28rem);color:var(--muted);max-width:620px;margin:0 auto 30px}
+  .cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .micro{margin-top:16px;font-size:.85rem;color:var(--muted)}
+
+  section{padding:54px 0;border-top:1px solid var(--line)}
+  h2{font-family:"Fredoka";font-weight:600;font-size:clamp(1.5rem,4vw,2.1rem);letter-spacing:-.5px;margin-bottom:8px;text-align:center}
+  .sub{color:var(--muted);text-align:center;max-width:560px;margin:0 auto 36px}
+
+  /* steps */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .step{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:18px;padding:26px 22px}
+  .step .n{font-family:"Fredoka";font-weight:700;color:var(--teal);font-size:1.1rem;margin-bottom:10px}
+  .step h3{font-family:"Fredoka";font-weight:600;font-size:1.16rem;margin-bottom:8px}
+  .step p{color:var(--muted);font-size:.97rem}
+
+  /* benefits */
+  .benefits{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .benefit{padding:4px}
+  .benefit .ic{width:44px;height:44px;border-radius:12px;background:rgba(84,199,208,.12);border:1px solid rgba(84,199,208,.3);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+  .benefit h3{font-family:"Fredoka";font-weight:600;font-size:1.12rem;margin-bottom:6px}
+  .benefit p{color:var(--muted);font-size:.96rem}
+
+  /* use cases */
+  .chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:640px;margin:0 auto}
+  .chip{border:1px solid var(--line);border-radius:999px;padding:9px 16px;font-family:"Fredoka";font-weight:500;font-size:.95rem;color:var(--ink);background:var(--panel)}
+
+  /* faq */
+  .faq{max-width:720px;margin:0 auto}
+  details{border:1px solid var(--line);border-radius:14px;padding:4px 20px;margin-bottom:12px;background:var(--panel)}
+  details[open]{border-color:rgba(84,199,208,.4)}
+  summary{font-family:"Fredoka";font-weight:600;font-size:1.05rem;cursor:pointer;padding:16px 0;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:14px}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";color:var(--teal);font-size:1.4rem;font-weight:600;flex:0 0 auto}
+  details[open] summary::after{content:"\2013"}
+  details p{color:var(--muted);padding:0 0 18px;font-size:.98rem}
+  .soon{display:inline-block;font-family:"Fredoka";font-weight:600;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:var(--teal);background:rgba(84,199,208,.12);border:1px solid rgba(84,199,208,.32);border-radius:999px;padding:2px 9px;margin-left:4px;vertical-align:middle}
+
+  /* final cta */
+  .final{text-align:center;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:24px;padding:48px 26px;margin:8px 0}
+  .final h2{margin-bottom:12px}
+  .final p{color:var(--muted);max-width:480px;margin:0 auto 26px}
+
+  footer{border-top:1px solid var(--line);padding:34px 0 50px;text-align:center;color:var(--muted);font-size:.86rem}
+  footer a{color:var(--teal);text-decoration:none}
+
+  @media(max-width:680px){
+    .steps,.benefits{grid-template-columns:1fr}
+    .hero{padding:48px 0 40px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="/concierge" aria-label="Concierge Caller home">
+      <svg viewBox="0 0 100 104" fill="none" stroke="#54C7D0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="50" y1="6" x2="50" y2="18"/><circle cx="50" cy="6" r="4" fill="#54C7D0"/>
+        <path d="M28 22 h44 a6 6 0 0 1 6 6 v18 a28 28 0 0 1 -56 0 v-18 a6 6 0 0 1 6 -6 z" fill="#0E1316"/>
+        <path d="M38 40 a5 5 0 0 1 9 0 a5 5 0 0 1 9 0 q0 6 -9 11 q-9 -5 -9 -11 z" fill="#EC2A7B" transform="translate(-9,2)"/>
+        <path d="M38 40 a5 5 0 0 1 9 0 a5 5 0 0 1 9 0 q0 6 -9 11 q-9 -5 -9 -11 z" fill="#EC2A7B" transform="translate(13,2)"/>
+        <path d="M50 72 L40 66 L40 78 Z M50 72 L60 66 L60 78 Z" fill="#EC2A7B"/><circle cx="50" cy="72" r="2.9" fill="#EC2A7B"/>
+      </svg>
+      <b>Concierge <span class="pink">Caller</span></b>
+    </a>
+    <!-- EDIT: primary call-to-action link -->
+    <a class="btn btn-primary" href="/holdtime">Get started</a>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero" style="border-top:none">
+    <div class="wrap">
+      <div class="eyebrow">By Aperture Automations</div>
+      <h1>Never wait on <span class="pink">hold</span> again.</h1>
+      <p class="lede">Concierge Caller is an AI assistant that calls companies, sits through the hold music for you, and rings you back the moment a real person picks up.</p>
+      <div class="cta-row">
+        <!-- EDIT: these two links point wherever you want -->
+        <a class="btn btn-primary" href="/holdtime">See what hold time costs you →</a>
+        <a class="btn btn-ghost" href="https://calendly.com/secretlloyd/30min">Book a 30-min call</a>
+      </div>
+      <p class="micro">Your first call is free. After that, just $15 per successful call — and no human reached means no charge.</p>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section>
+    <div class="wrap">
+      <h2>How it works</h2>
+      <p class="sub">Three steps. You do the first one. We do the waiting.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="n">01</div>
+          <h3>Tell us who to call</h3>
+          <p>Pick the company and tell us what you need handled — a billing question, a cancellation, a claim, whatever's stealing your afternoon.</p>
+        </div>
+        <div class="step">
+          <div class="n">02</div>
+          <h3>We wait on hold</h3>
+          <p>Concierge Caller dials in, works through the phone menus, and holds the line through every minute of "your call is important to us."</p>
+        </div>
+        <div class="step">
+          <div class="n">03</div>
+          <h3>We call you back</h3>
+          <p>The instant a real human answers, your phone rings and you're connected — straight to a person, no hold music required.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENEFITS -->
+  <section>
+    <div class="wrap">
+      <h2>Why people love it</h2>
+      <p class="sub">Because being on hold is one of the worst ways to spend a life.</p>
+      <div class="benefits">
+        <div class="benefit">
+          <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#54C7D0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <h3>Get your time back</h3>
+          <p>Reclaim the hours you'd lose to hold music. Go work, rest, or live — we'll ring when it matters.</p>
+        </div>
+        <div class="benefit">
+          <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#54C7D0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></div>
+          <h3>Skip the maze</h3>
+          <p>No more pressing 1, then 4, then 2, then waiting again. We navigate the phone tree so you don't have to.</p>
+        </div>
+        <div class="benefit">
+          <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#54C7D0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+          <h3>No human, no charge</h3>
+          <p>You only pay when we actually reach a real person for you. If we don't, it's free. Simple as that.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- USE CASES -->
+  <section>
+    <div class="wrap">
+      <h2>Made for the calls you dread</h2>
+      <p class="sub">If they put you on hold, we'll wait for you.</p>
+      <div class="chips">
+        <span class="chip">Utility companies</span>
+        <span class="chip">Insurance</span>
+        <span class="chip">Airlines</span>
+        <span class="chip">Banks &amp; credit cards</span>
+        <span class="chip">Internet &amp; cable</span>
+        <span class="chip">Government agencies</span>
+        <span class="chip">Healthcare billing</span>
+        <span class="chip">Customer support</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ (answer-first; this is what AI engines cite) -->
+  <section>
+    <div class="wrap">
+      <h2>Questions, answered</h2>
+      <p class="sub">The stuff people actually want to know.</p>
+      <div class="faq">
+        <details open>
+          <summary>Is there really a service that waits on hold for me?</summary>
+          <p>Yes. Concierge Caller calls the company for you, waits through the hold music and phone menus, and rings you back the moment a real person picks up. You never sit on hold again.</p>
+        </details>
+        <details>
+          <summary>How does Concierge Caller work?</summary>
+          <p>You tell us who to call and what you need. We dial in, navigate the phone menus, and hold the line. When a live human answers, your phone rings and you're connected instantly — straight to a person.</p>
+        </details>
+        <details>
+          <summary>Do I have to stay by my phone while it waits?</summary>
+          <p>Nope. Go live your life. Concierge Caller does all the waiting and only rings you when there's a real human on the line ready to talk.</p>
+        </details>
+        <details>
+          <summary>Which companies can it call?</summary>
+          <p>Most major companies with phone support — utilities, insurance, airlines, banks, internet providers, government agencies, and more. If they put people on hold, we can wait for you.</p>
+        </details>
+        <details>
+          <summary>What if a real person is never reached?</summary>
+          <p>Then you're not charged. No human, no charge — you only pay when we actually connect you to a live person.</p>
+        </details>
+        <details>
+          <summary>How much does it cost?</summary>
+          <p>Simple and fair: your <strong>first call is free</strong>. After that, it's <strong>$15 per successful call</strong> — and you're only charged when we actually connect you to a real person. No human, no charge.</p>
+          <p style="padding-top:0">Prefer to buy in advance and save? <strong>Prepaid call bundles</strong> <span class="soon">Coming soon</span></p>
+        </details>
+        <details>
+          <summary>Is my information safe?</summary>
+          <p>We only use the details you give us to make the call you asked for. We don't sell your information, and you stay in control of what we handle on your behalf.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section style="border-top:none">
+    <div class="wrap">
+      <div class="final">
+        <h2>Stop paying the hold-time tax.</h2>
+        <p>See how many hours a year you're losing on hold — then let Concierge Caller take those calls off your plate.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="/holdtime">See what hold time costs you →</a>
+          <a class="btn btn-ghost" href="https://calendly.com/secretlloyd/30min">Book a 30-min call</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><b style="font-family:'Fredoka';color:var(--ink)">Concierge Caller</b> — a product of <a href="https://apertureautomations.ai">Aperture Automations</a>, Fresno, CA.</p>
+    <p style="margin-top:8px">© 2026 Aperture Automations LLC. All rights reserved.</p>
+  </div>
+</footer>
+
+</body>
+</html>
